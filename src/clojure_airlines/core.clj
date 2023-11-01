@@ -83,3 +83,28 @@
 ;
 ;(doseq [edge @(:edges g)]
 ;  (println edge))
+
+
+;; Additional functions that might be useful
+
+(defn graph-get-neighbors [graph label]
+  (let [vertex (get @(:vertices graph) label)]
+    (if vertex
+      @(:neighbors vertex)
+      (do (println (str "Warning: No vertex found for label " label))
+          []))))                                            ; Return an empty list if vertex doesn't exist
+(defn graph-has-vertex? [graph label]
+  (contains? @(:vertices graph) label))
+(defn graph-has-edge? [graph from to]
+  (contains? @(:edges graph) (graph-edge-key from to)))
+(defn graph-reset! [graph]
+  (doseq [vertex (vals @(:vertices graph))]
+    (dosync (ref-set (:visited vertex) 0))))
+
+(defn get-edge-weight [graph from to]
+  (:weight (get @(:edges graph) (graph-edge-key from to))))
+
+(defn reset-costs! [graph]
+  (doseq [vertex (vals @(:vertices graph))]
+    (dosync
+      (ref-set (:cost-so-far vertex) 0))))
