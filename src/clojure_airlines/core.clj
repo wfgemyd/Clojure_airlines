@@ -1,5 +1,7 @@
 (ns clojure-airlines.core
-  (:gen-class))
+  (:gen-class)
+  (:require [clojure.data.csv :as csv]
+            [clojure.java.io :as io]))
 
 (defrecord Graph [vertices edges])
 (defn make-graph []
