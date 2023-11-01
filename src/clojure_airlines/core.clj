@@ -41,3 +41,45 @@
       (ref-set (:neighbors from-vertex) (conj from-vertex-neighbors to))
       (ref-set (:neighbors to-vertex) (conj to-vertex-neighbors from)))))
 
+
+
+
+;; Parsing the CSV file into a sequence of sequences
+(defn take-csv
+  [fname]
+  (with-open [file (io/reader fname)]
+    (-> file
+        (slurp)
+        (csv/read-csv))))
+(def csv-file (take-csv "src/airlines/Flights_ICA1.csv"))
+;(println csv-file)
+
+;; Defining the graph structure
+(def g (make-graph))
+
+;; Converting the data obtained from parsing the scv file to the edges and vertices of the graph
+(defn csv-to-graph [csv-file g]
+  (let [existing-vertex-labels (atom [])]
+    (doseq [vector csv-file]
+      (doseq [vec (vec (take 2 vector))]
+        ;; For every city name we stumble upon, verify whether a corresponding vertex already exists; if not, add one.
+        (if (not (.contains @existing-vertex-labels vec))
+          (do
+            (graph-add-vertex! g (str vec))
+            (reset! existing-vertex-labels (conj @existing-vertex-labels vec)))))
+      ;; For each row in the CSV file, establish a corresponding edge within the graph.
+      (graph-add-edge! g
+                       (str (get vector 0))
+                       (str (get vector 1))
+                       (str (get vector 0) " " (get vector 1) " " (get vector 2))
+                       (Integer/parseInt (get vector 2))))))
+
+(csv-to-graph csv-file g)
+
+;; Uncomment to see the edges and vertices of the graph
+
+;(doseq [vertex @(:vertices g)]
+;  (println vertex))
+;
+;(doseq [edge @(:edges g)]
+;  (println edge))
