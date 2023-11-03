@@ -109,3 +109,33 @@
     (dosync
       (ref-set (:cost-so-far vertex) 0))))
 
+(defn bfs-find-plans [graph start-label end-city-spec budget max-flights]
+  (let [start-cost (get-edge-weight graph start-label start-label)
+        queue (ref [[{:vertex start-label :cost (or start-cost 0)}]])
+        plans (ref [])]
+
+    (while (not (empty? @queue))
+      (let [path (first @queue)]
+        (dosync
+          (ref-set queue []))
+        (let [current-vertex (-> path last :vertex)
+              current-cost (-> path last :cost)
+              (get @(:vertices graph) current-vertex)]
+
+          (when (and (and (string? end-city-spec) (= current-vertex end-city-spec))
+                     (<= current-cost budget)
+                     (<= (- (count path) 1) max-flights))
+            (dosync
+              (ref-set plans (conj @plans {:path (map (fn [p] {:city (:vertex p) :cost (:cost p)}) path) :total-cost current-cost}))))
+
+          (let [neighbors (graph-get-neighbors graph current-vertex)]
+            (doseq [neighbor neighbors]
+              (let [edge-cost (get-edge-weight graph current-vertex neighbor)
+                    total-cost (+ current-cost edge-cost)]
+                (when (and (not (some #(= neighbor (:vertex %)) path))
+                           (<= total-cost budget)
+                           (< (- (count path) 1) max-flights))
+                  (dosync
+                    (alter queue conj (conj path {:vertex neighbor :cost total-cost}))))))))))
+    @plans)
+  )
