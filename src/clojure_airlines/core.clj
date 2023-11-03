@@ -51,7 +51,7 @@
     (-> file
         (slurp)
         (csv/read-csv))))
-(def csv-file (take-csv "src/airlines/Flights_ICA1.csv"))
+(def csv-file (take-csv "src/clojure_airlines/Flights_ICA1.csv"))
 ;(println csv-file)
 
 ;; Defining the graph structure
@@ -108,3 +108,4 @@
   (doseq [vertex (vals @(:vertices graph))]
     (dosync
       (ref-set (:cost-so-far vertex) 0))))
+
