@@ -117,10 +117,11 @@
     (while (not (empty? @queue))
       (let [path (first @queue)]
         (dosync
-          (ref-set queue []))
+          (ref-set queue (rest @queue)))
+
         (let [current-vertex (-> path last :vertex)
               current-cost (-> path last :cost)
-              (get @(:vertices graph) current-vertex)]
+              current-vertex-data (get @(:vertices graph) current-vertex)]
 
           (when (and (and (string? end-city-spec) (= current-vertex end-city-spec))
                      (<= current-cost budget)
