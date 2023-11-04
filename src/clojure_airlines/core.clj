@@ -110,33 +110,57 @@
       (ref-set (:cost-so-far vertex) 0))))
 
 (defn bfs-find-plans [graph start-label end-city-spec budget max-flights]
+  ; Compute the cost of the start city (self-loop).
   (let [start-cost (get-edge-weight graph start-label start-label)
+        ; Initialize a queue of paths with the correct start cost.
         queue (ref [[{:vertex start-label :cost (or start-cost 0)}]])
+        ; Initialize an empty list to store valid plans.
         plans (ref [])]
 
+    ; Continue searching as long as there are paths in the queue.
     (while (not (empty? @queue))
+      ; Dequeue the first path (FIFO).
       (let [path (first @queue)]
+        ; Remove the path from the queue.
         (dosync
           (ref-set queue (rest @queue)))
 
+        ; Extract the current vertex and its cost from the last map in the path.
         (let [current-vertex (-> path last :vertex)
               current-cost (-> path last :cost)
+              ; Fetch the data associated with the current vertex from the graph.
               current-vertex-data (get @(:vertices graph) current-vertex)]
 
+          ; Print the current exploring path for debugging purposes.
+          ;(println "Exploring path:" (vec (map :vertex path)))
+
+          ; Check if the current vertex is a valid endpoint (matches the desired name)
+          ; and the path respects the constraints (cost and number of flights).
           (when (and (and (string? end-city-spec) (= current-vertex end-city-spec))
                      (<= current-cost budget)
                      (<= (- (count path) 1) max-flights))
+            ; If it's a valid plan, add it to the list of plans.
             (dosync
               (ref-set plans (conj @plans {:path (map (fn [p] {:city (:vertex p) :cost (:cost p)}) path) :total-cost current-cost}))))
 
+          ; Get the neighbors of the current vertex.
           (let [neighbors (graph-get-neighbors graph current-vertex)]
             (doseq [neighbor neighbors]
+              ;(println "current cost: " current-cost) Print the current cost for debugging purposes.
+              ; Determine the cost to travel from the current vertex to this neighbor.
               (let [edge-cost (get-edge-weight graph current-vertex neighbor)
                     total-cost (+ current-cost edge-cost)]
+
+                ; Check if the neighbor hasn't been visited in this path,
+                ; the path respects the budget, and the number of flights.
                 (when (and (not (some #(= neighbor (:vertex %)) path))
                            (<= total-cost budget)
                            (< (- (count path) 1) max-flights))
+                  ; If valid, enqueue a new path that includes this neighbor.
+                  ; Here we update the cost for the new city in the path to be the cumulative cost up to that city.
                   (dosync
                     (alter queue conj (conj path {:vertex neighbor :cost total-cost}))))))))))
+
+    ; Return the list of valid plans.
     @plans)
   )
