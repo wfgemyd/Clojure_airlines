@@ -25,10 +25,7 @@ The program is structured as follows:
 
 3. Ensure that the "Flights_ICA1.csv" file is in the "src/airlines" directory, or replace it with your own CSV file with flight data.
 
-4. Run the program using the following command:
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+4. Run the program.
 
 lein run
 
