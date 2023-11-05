@@ -3,11 +3,8 @@
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]))
 
-(ns airlines.core
-  (:gen-class)
-  (:require [clojure.data.csv :as csv]
-            [clojure.java.io :as io]))
 ;; Adding additional dependencies
+(defrecord Graph [vertices edges])
 (defn make-graph []
   (Graph. (ref {}) (ref {})))
 (defrecord Vertex [label visited neighbors cost-so-far path])
@@ -50,7 +47,7 @@
         (csv/read-csv))))
 
 ;; Parsing the CSV file into a sequence of sequences
-(def csv-file (take-csv "src/airlines/Flights_ICA1.csv"))
+(def csv-file (take-csv "src/clojure_airlines/Flights_ICA1.csv"))
 (def g (make-graph))
 
 ;(println csv-file)
