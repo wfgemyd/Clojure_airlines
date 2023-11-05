@@ -1,16 +1,16 @@
-(ns clojure-airlines.core
+(ns clojure_airlines.core
   (:gen-class)
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]))
-
 ;; Adding additional dependencies
 (defrecord Graph [vertices edges])
 (defn make-graph []
   (Graph. (ref {}) (ref {})))
-(defrecord Vertex [label visited neighbors cost-so-far path])
 
+(defrecord Vertex [label visited neighbors cost-so-far path])
 (defn make-vertex [label]
   (Vertex. label (ref 0) (ref '()) (ref 0) (ref '())))
+
 (defn graph-add-vertex! [graph label]
   (let [vertices (:vertices graph)
         new-vertex (make-vertex label)]
@@ -19,9 +19,9 @@
   nil)
 
 (defrecord Edge [from to label weight])
-
 (defn make-edge [from to label weight]
   (Edge. from to label weight))
+
 (defn graph-edge-key [from to]
   (sort (list from to)))
 
@@ -39,24 +39,25 @@
       (ref-set (:neighbors from-vertex) (conj from-vertex-neighbors to))
       (ref-set (:neighbors to-vertex) (conj to-vertex-neighbors from)))))
 
+;; Parsing the CSV file into a sequence of sequences
 (defn take-csv
   [fname]
   (with-open [file (io/reader fname)]
     (-> file
         (slurp)
         (csv/read-csv))))
-
-;; Parsing the CSV file into a sequence of sequences
 (def csv-file (take-csv "src/clojure_airlines/Flights_ICA1.csv"))
-(def g (make-graph))
 
 ;(println csv-file)
 ;; Defining the graph structure
+(def g (make-graph))
+
+;; Converting the data obtained from parsing the scv file to the edges and vertices of the graph
 (defn csv-to-graph [csv-file g]
   (let [existing-vertex-labels (atom [])]
     (doseq [vector csv-file]
       (doseq [vec (vec (take 2 vector))]
-        ;; For every city name we stumble upon, verify whether a corresponding vertex already exists; if not, add one.
+;; For every city name we stumble upon, verify whether a corresponding vertex already exists; if not, add one.
         (if (not (.contains @existing-vertex-labels vec))
           (do
             (graph-add-vertex! g (str vec))
@@ -68,15 +69,7 @@
                        (str (get vector 0) " " (get vector 1) " " (get vector 2))
                        (Integer/parseInt (get vector 2))))))
 
-;; Converting the data obtained from parsing the scv file to the edges and vertices of the graph
 (csv-to-graph csv-file g)
-
-(defn graph-get-neighbors [graph label]
-  (let [vertex (get @(:vertices graph) label)]
-    (if vertex
-      @(:neighbors vertex)
-      (do (println (str "Warning: No vertex found for label " label))
-          []))))
 
 ;; Uncomment to see the edges and vertices of the graph
 
@@ -86,15 +79,22 @@
 ;(doseq [edge @(:edges g)]
 ;  (println edge))
 
-(defn graph-has-vertex? [graph label]
-  (contains? @(:vertices graph) label))                     ; Return an empty list if vertex doesn't exist
+(defn graph-get-neighbors [graph label]
+  (let [vertex (get @(:vertices graph) label)]
+    (if vertex
+      @(:neighbors vertex)
+      (do (println (str "Warning: No vertex found for label " label))
+          []))))                                            ; Return an empty list if vertex doesn't exist
 
 ;; Additional functions that might be useful
+(defn graph-has-vertex? [graph label]
+  (contains? @(:vertices graph) label))
 (defn graph-has-edge? [graph from to]
   (contains? @(:edges graph) (graph-edge-key from to)))
 (defn graph-reset! [graph]
   (doseq [vertex (vals @(:vertices graph))]
     (dosync (ref-set (:visited vertex) 0))))
+
 (defn get-edge-weight [graph from to]
   (:weight (get @(:edges graph) (graph-edge-key from to))))
 
@@ -201,8 +201,6 @@
                             path)]
     (str "Path: " (clojure.string/join " --> " formatted-path))))
 
-(defrecord Graph [vertices edges])
-
 
 (defn reverse-engineer-costs [path]                         ;;just lazy to fix it in the BFS it is basically reassigning the cost
   (loop [remaining-path (reverse path)                      ; Reverse the path so we start from the end
@@ -288,4 +286,3 @@
       (print-reversed-plans plans))))
 
 (main g)
-
