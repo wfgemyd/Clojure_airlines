@@ -1,34 +1,41 @@
-# clojure_airlines
-This Clojure program reads flight data from a CSV file, creates a graph representation of the flight network, and allows users to find flight plans based on their preferences.
+# Clojure Airlines
+This Clojure program efficiently reads and processes flight data, offering personalized flight plans tailored to your preferences.
 
 ## Overview
 
 The program is structured as follows:
 
-- It parses flight data from a CSV file named "Flights_ICA1.csv" using the `clojure.data.csv` library.
+- **Data Parsing**: Utilizes clojure.data.csv to parse flight information from the "Flights_ICA1.csv" dataset.
 
-- The flight network is represented as a graph with vertices and edges, where vertices represent cities and edges represent flights between cities.
+- **Graph Representation**: Constructs a graph where cities are vertices and flights are edges, representing the entire flight network.
 
-- Users can input their current location, destination, budget, and the maximum number of flights they are willing to take.
+- **User Input**: Accepts user preferences including current location, destination, budget, and maximum flight count.
 
-- The program then uses a breadth-first search (BFS) algorithm to find flight plans that meet the user's criteria.
+- **Flight Plan Generation**: Employs a breadth-first search (BFS) algorithm to curate flight plans meeting user's criteria.
 
-- The found flight plans are sorted by total cost and the number of flights taken.
+- **Sorting and Optimization**: Sorts flight plans by cost and flight count, eliminating duplicates.
 
-- Duplicate paths are removed, and the program displays the most expensive and cheapest valid plans.
 
 ## Usage
 
-1. Make sure you have Clojure installed on your system.
+1. Ensure Clojure and Leiningen are installed on your system. Visit [Clojure's official website](https://clojure.org/guides/install_clojure) and [Leiningen's website](https://leiningen.org/#install) for installation instructions.
 
 2. Clone this repository and navigate to the project directory.
 
-3. Ensure that the "Flights_ICA1.csv" file is in the "src/airlines" directory, or replace it with your own CSV file with flight data.
+  ```
+  git clone https://github.com/wfgemyd/Clojure_airlines.git
+  ```
 
-4. Run the program.
+3.  Make sure that the required dependencies are connected correctly.
 
-lein run
+```
+lein deps 
+lein deps :tree
+```
 
+4. Ensure that the dataset "Flights_ICA1.csv" file is in the "src/airlines" directory. Alternatively, you can use your own dataset. Ensure it's in CSV format and contains necessary flight data fields.
+
+5. Run the program using Clojure REPL. 
 
 5. Follow the prompts to provide your current location, destination, budget, and maximum number of flights.
 
@@ -36,20 +43,27 @@ lein run
 
 ## Example
 
-Here's an example of using the program:
-Searching for plans from New York to Los Angeles with a budget of 500 and a maximum of 2 flights:
+### Scenario
+Finding flights from New York to Los Angeles with a budget of $500 and a maximum of 2 flights.
 
-Plan 1 (Most Expensive):
-Path: New York --> Chicago (200) --> Los Angeles (300)
-Total Cost: 500
-Amount of flights: 2
+### Results
+- **Plan 1 (Most Expensive)**:
 
-Plan 2 (Cheapest):
-Path: New York --> Los Angeles (500)
-Total Cost: 500
-Amount of flights: 1
+  Path: New York --> Chicago (200) --> Los Angeles (300)
 
-Features
+  Total Cost: 500
+
+  Amount of flights: 2
+
+- **Plan 2 (Cheapest)**:
+
+  Path: New York --> Los Angeles (500)
+
+  Total Cost: 500
+
+  Amount of flights: 1
+
+## Features
 List the key features of your program, such as:
 
 Flight data parsing from CSV files.
