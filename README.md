@@ -1,4 +1,4 @@
-# Clojure Airlines
+# Clojure Airlines 🛫
 This Clojure program efficiently reads and processes flight data, offering personalized flight plans tailored to your preferences.
 
 ## Overview
@@ -16,9 +16,9 @@ The program is structured as follows:
 - **Sorting and Optimization**: Sorts flight plans by cost and flight count, eliminating duplicates.
 
 
-## Usage
+## Usage 
 
-1. Ensure Clojure and Leiningen are installed on your system. Visit [Clojure's official website](https://clojure.org/guides/install_clojure) and [Leiningen's website](https://leiningen.org/#install) for installation instructions.
+1. Ensure that JDK, Clojure and Leiningen are installed on your system. Visit [Oracle website](https://www.oracle.com/java/technologies/downloads), [Clojure's official website](https://clojure.org/guides/install_clojure) and [Leiningen's website](https://leiningen.org/#install) for installation instructions.
 
 2. Clone this repository and navigate to the project directory.
 
@@ -49,38 +49,31 @@ Finding flights from New York to Los Angeles with a budget of $500 and a maximum
 ### Results
 - **Plan 1 (Most Expensive)**:
 
+  ```
   Path: New York --> Chicago (200) --> Los Angeles (300)
-
   Total Cost: 500
-
   Amount of flights: 2
-
+  ```
 - **Plan 2 (Cheapest)**:
 
+  ```
   Path: New York --> Los Angeles (500)
-
   Total Cost: 500
-
   Amount of flights: 1
+  ```
+## Features 
 
-## Features
-List the key features of your program, such as:
+- **Custom Flight Search**: Input your travel details and let our algorithm present you with the best flight options.
+  
+- **Interactive CLI**: The interactive command-line prompts offer a user-friendly experience for easy navigation.
+  
+- **Multiple Destinations**: Multiple route options can be explored to reach your desired location.
+  
+- **Graph representation of flight networks**: The flight connections and cities are presented in a graph data structure for a clear representation of the flight network.
+  
+- **Customizable and Extensible Code Structure**: Tailor the application to your needs or contribute to its growth!
 
-Flight data parsing from CSV files.
-Graph-based representation of flight networks.
-User-friendly input prompts and customization options.
-Search algorithm for finding flight plans based on user criteria.
-Sorting and filtering of flight plans.
-Duplicate path removal.
-Customizable and extensible code structure.
-
-## Dependencies
-
-- Clojure: The program is written in Clojure, so you need to have Clojure installed to run it.
-
-- `clojure.data.csv`: This library is used for parsing CSV files. You can add it to your project's dependencies.
-
-Future Improvements
+## Future Improvements
 In future updates, we plan to:
 
 Enhance the user interface for a more interactive experience.
