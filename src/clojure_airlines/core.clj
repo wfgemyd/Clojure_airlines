@@ -3,14 +3,19 @@
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]))
 ;; Adding additional dependencies
+
+;; Defining the graph structure
 (defrecord Graph [vertices edges])
 (defn make-graph []
   (Graph. (ref {}) (ref {})))
 
+;; Defining the vertex structure
 (defrecord Vertex [label visited neighbors cost-so-far path])
 (defn make-vertex [label]
   (Vertex. label (ref 0) (ref '()) (ref 0) (ref '())))
 
+
+;; Adding vertices to the graph
 (defn graph-add-vertex! [graph label]
   (let [vertices (:vertices graph)
         new-vertex (make-vertex label)]
@@ -18,6 +23,7 @@
       (ref-set vertices (assoc @vertices label new-vertex))))
   nil)
 
+;; Defining the edge structure
 (defrecord Edge [from to label weight])
 (defn make-edge [from to label weight]
   (Edge. from to label weight))
@@ -49,7 +55,8 @@
 (def csv-file (take-csv "src/clojure_airlines/Flights_ICA1.csv"))
 
 ;(println csv-file)
-;; Defining the graph structure
+
+;; Defining the graph
 (def g (make-graph))
 
 ;; Converting the data obtained from parsing the scv file to the edges and vertices of the graph
@@ -135,6 +142,9 @@
             ; If it's a valid plan, add it to the list of plans.
             (dosync (ref-set plans (conj @plans {:path (map (fn [p] {:city (:vertex p) :cost (:cost p)}) path) :total-cost current-cost}))))
 
+          ; Check if current vertex is not the destination before exploring further.
+          ; If it is, do not explore the neighbors of the current vertex.
+          (when (not (= current-vertex end-city-spec))
           ; Get the neighbors of the current vertex.
           (let [neighbors (graph-get-neighbors graph current-vertex)]
             (doseq [neighbor neighbors]
@@ -151,7 +161,7 @@
                   ; If valid, enqueue a new path that includes this neighbor.
                   ; Here we update the cost for the new city in the path to be the cumulative cost up to that city.
                   (dosync
-                    (alter queue conj (conj path {:vertex neighbor :cost total-cost}))))))))))
+                    (alter queue conj (conj path {:vertex neighbor :cost total-cost})))))))))))
 
     ; Return the list of valid plans.
     @plans))
