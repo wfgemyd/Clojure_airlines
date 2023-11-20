@@ -1,5 +1,6 @@
 # Clojure Airlines 🛫
-This Clojure program efficiently reads and processes flight data, offering personalized flight plans tailored to your preferences.
+
+This project forms a part of the Symbolic Computation course in the BSc (Hons) Computing program. Presented Clojure program efficiently reads and processes flight data, offering personalized flight plans tailored to your preferences.
 
 ## Overview
 
@@ -73,15 +74,20 @@ Finding flights from New York to Los Angeles with a budget of $500 and a maximum
   
 - **Customizable and Extensible Code Structure**: Tailor the application to your needs or contribute to its growth!
 
+## Limitations 
+
+- **Single Data Source**: The program currently supports only one CSV data file as a data source for flight information.
+
 ## Future Improvements
-In future updates, we plan to:
+There are several future improvements that might be considered: 
 
-Enhance the user interface for a more interactive experience.
-Implement additional search algorithms for finding flight plans.
-Support more advanced filtering and sorting options for flight plans.
-Handle various data formats and sources for flight information.
-Stay tuned for updates and improvements to make your flight planning experience even better!
+- Optimize the BFS algorithm to stop exploring the neighbors further after reaching the maximum amount of layovers or exceeding the budget.
 
-Thank you for using our Flight Planner in Clojure. We hope it helps you find the perfect flight plans for your travel needs.
+- Support filtering and sorting options for flight plans, for example filtering by cheapest or most convenient flights.
 
-Happy travels! ✈️🌍🌆
+- Enhance the user interface for a more interactive experience.
+
+- Handle various data formats and sources for flight information.
+
+## License
+

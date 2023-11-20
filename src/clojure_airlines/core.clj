@@ -7,20 +7,19 @@
 ;; Defining the graph structure
 (defrecord Graph [vertices edges])
 (defn make-graph []
-  (Graph. (ref {}) (ref {})))
+  (Graph. (atom {}) (atom {})))
 
 ;; Defining the vertex structure
 (defrecord Vertex [label visited neighbors cost-so-far path])
 (defn make-vertex [label]
-  (Vertex. label (ref 0) (ref '()) (ref 0) (ref '())))
+  (Vertex. label (atom 0) (atom '()) (atom 0) (atom '())))
 
 
 ;; Adding vertices to the graph
 (defn graph-add-vertex! [graph label]
   (let [vertices (:vertices graph)
         new-vertex (make-vertex label)]
-    (dosync
-      (ref-set vertices (assoc @vertices label new-vertex))))
+    (reset! vertices (assoc @vertices label new-vertex)))
   nil)
 
 ;; Defining the edge structure
@@ -39,11 +38,10 @@
         to-vertex-neighbors @(:neighbors to-vertex)
         new-edge (make-edge from to label weight)
         new-edge-key (graph-edge-key from to)]
-    (dosync
-      ;(println "adding edge: " (:label from-vertex) (:label to-vertex))
-      (ref-set (:edges graph) (assoc @(:edges graph) new-edge-key new-edge))
-      (ref-set (:neighbors from-vertex) (conj from-vertex-neighbors to))
-      (ref-set (:neighbors to-vertex) (conj to-vertex-neighbors from)))))
+    ;(println "adding edge: " (:label from-vertex) (:label to-vertex))
+    (reset! (:edges graph) (assoc @(:edges graph) new-edge-key new-edge))
+    (reset! (:neighbors from-vertex) (conj from-vertex-neighbors to))
+    (reset! (:neighbors to-vertex) (conj to-vertex-neighbors from))))
 
 ;; Parsing the CSV file into a sequence of sequences
 (defn take-csv
@@ -64,7 +62,7 @@
   (let [existing-vertex-labels (atom [])]
     (doseq [vector csv-file]
       (doseq [vec (vec (take 2 vector))]
-;; For every city name we stumble upon, verify whether a corresponding vertex already exists; if not, add one.
+        ;; For every city name we stumble upon, verify whether a corresponding vertex already exists; if not, add one.
         (if (not (.contains @existing-vertex-labels vec))
           (do
             (graph-add-vertex! g (str vec))
@@ -100,15 +98,14 @@
   (contains? @(:edges graph) (graph-edge-key from to)))
 (defn graph-reset! [graph]
   (doseq [vertex (vals @(:vertices graph))]
-    (dosync (ref-set (:visited vertex) 0))))
+    (reset! (:visited vertex) 0)))
 
 (defn get-edge-weight [graph from to]
   (:weight (get @(:edges graph) (graph-edge-key from to))))
 
 (defn reset-costs! [graph]
   (doseq [vertex (vals @(:vertices graph))]
-    (dosync
-      (ref-set (:cost-so-far vertex) 0))))
+    (reset! (:cost-so-far vertex) 0)))
 
 (defn bfs-find-plans [graph start-label end-city-spec budget max-flights]
   ; Compute the cost of the start city (self-loop).
@@ -116,14 +113,15 @@
         ; Initialize a queue of paths with the correct start cost.
         queue (ref [[{:vertex start-label :cost (or start-cost 0)}]])
         ; Initialize an empty list to store valid plans.
-        plans (ref [])]
+        plans (atom [])]
 
     ; Continue searching as long as there are paths in the queue.
     (while (not (empty? @queue))
       ; Dequeue the first path (FIFO).
       (let [path (first @queue)]
         ; Remove the path from the queue.
-        (dosync (ref-set queue (rest @queue)))
+        (dosync
+          (ref-set queue (rest @queue)))
 
         ; Extract the current vertex and its cost from the last map in the path.
         (let [current-vertex (-> path last :vertex)
@@ -140,28 +138,29 @@
                      (<= current-cost budget)
                      (<= (- (count path) 1) max-flights))
             ; If it's a valid plan, add it to the list of plans.
-            (dosync (ref-set plans (conj @plans {:path (map (fn [p] {:city (:vertex p) :cost (:cost p)}) path) :total-cost current-cost}))))
+            (reset! plans (conj @plans {:path (map (fn [p] {:city (:vertex p) :cost (:cost p)}) path) :total-cost current-cost})))
 
           ; Check if current vertex is not the destination before exploring further.
           ; If it is, do not explore the neighbors of the current vertex.
           (when (not (= current-vertex end-city-spec))
-          ; Get the neighbors of the current vertex.
-          (let [neighbors (graph-get-neighbors graph current-vertex)]
-            (doseq [neighbor neighbors]
-              ;(println "current cost: " current-cost) Print the current cost for debugging purposes.
-              ; Determine the cost to travel from the current vertex to this neighbor.
-              (let [edge-cost (get-edge-weight graph current-vertex neighbor)
-                    total-cost (+ current-cost edge-cost)]
+            ; Get the neighbors of the current vertex.
+            (let [neighbors (graph-get-neighbors graph current-vertex)]
+              (doseq [neighbor neighbors]
+                ;(println "current cost: " current-cost) Print the current cost for debugging purposes.
+                ; Determine the cost to travel from the current vertex to this neighbor.
+                (let [edge-cost (get-edge-weight graph current-vertex neighbor)
+                      total-cost (+ current-cost edge-cost)]
 
-                ; Check if the neighbor hasn't been visited in this path,
-                ; the path respects the budget, and the number of flights.
-                (when (and (not (some #(= neighbor (:vertex %)) path))
-                           (<= total-cost budget)
-                           (< (- (count path) 1) max-flights))
-                  ; If valid, enqueue a new path that includes this neighbor.
-                  ; Here we update the cost for the new city in the path to be the cumulative cost up to that city.
-                  (dosync
-                    (alter queue conj (conj path {:vertex neighbor :cost total-cost})))))))))))
+                  ; Check if the neighbor hasn't been visited in this path,
+                  ; the path respects the budget, and the number of flights.
+                  (when (and (not (some #(= neighbor (:vertex %)) path))
+                             (<= total-cost budget)
+                             (< (- (count path) 1) max-flights))
+                    ; If valid, enqueue a new path that includes this neighbor.
+                    ; Here we update the cost for the new city in the path to be the cumulative cost up to that city.
+                    (dosync
+                      (alter queue conj (conj path {:vertex neighbor :cost total-cost})))))))))))
+    ; conjoining to a vector is done at the end with time complexity O(1)
 
     ; Return the list of valid plans.
     @plans))
@@ -212,7 +211,7 @@
     (str "Path: " (clojure.string/join " --> " formatted-path))))
 
 
-(defn reverse-engineer-costs [path]                         ;;just lazy to fix it in the BFS it is basically reassigning the cost
+(defn reverse-engineer-costs [path]
   (loop [remaining-path (reverse path)                      ; Reverse the path so we start from the end
          last-cost (-> path last :cost)
          result []]
@@ -268,7 +267,9 @@
     (doseq [[idx city] (map vector (range 1 (inc (count cities))) cities)]
       (println (str idx ". " city)))
     (let [choice-str (read-line)
-          choice (if (re-matches #"\d+" choice-str) (Integer/parseInt choice-str) 0)] ; Convert valid string to integer
+          choice (if
+                   (re-matches #"\d+" choice-str)
+                   (Integer/parseInt choice-str) 0)] ; Convert valid string to integer
       (if (and (>= choice 1) (<= choice (count cities)))
         (nth cities (dec choice))
         (do
