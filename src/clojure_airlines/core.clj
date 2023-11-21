@@ -19,7 +19,7 @@
 (defn graph-add-vertex! [graph label]
   (let [vertices (:vertices graph)
         new-vertex (make-vertex label)]
-    (reset! vertices (assoc @vertices label new-vertex)))
+    (swap! vertices assoc label new-vertex))
   nil)
 
 ;; Defining the edge structure
@@ -39,9 +39,25 @@
         new-edge (make-edge from to label weight)
         new-edge-key (graph-edge-key from to)]
     ;(println "adding edge: " (:label from-vertex) (:label to-vertex))
-    (reset! (:edges graph) (assoc @(:edges graph) new-edge-key new-edge))
+    (swap! (:edges graph) assoc new-edge-key new-edge)
     (reset! (:neighbors from-vertex) (conj from-vertex-neighbors to))
     (reset! (:neighbors to-vertex) (conj to-vertex-neighbors from))))
+
+;; Additional functions that might be useful
+(defn graph-has-vertex? [graph label]
+  (contains? @(:vertices graph) label))
+(defn graph-has-edge? [graph from to]
+  (contains? @(:edges graph) (graph-edge-key from to)))
+(defn graph-reset! [graph]
+  (doseq [vertex (vals @(:vertices graph))]
+    (reset! (:visited vertex) 0)))
+
+(defn get-edge-weight [graph from to]
+  (:weight (get @(:edges graph) (graph-edge-key from to))))
+
+(defn reset-costs! [graph]
+  (doseq [vertex (vals @(:vertices graph))]
+    (reset! (:cost-so-far vertex) 0)))
 
 ;; Parsing the CSV file into a sequence of sequences
 (defn take-csv
@@ -59,20 +75,17 @@
 
 ;; Converting the data obtained from parsing the scv file to the edges and vertices of the graph
 (defn csv-to-graph [csv-file g]
-  (let [existing-vertex-labels (atom [])]
     (doseq [vector csv-file]
-      (doseq [vec (vec (take 2 vector))]
-        ;; For every city name we stumble upon, verify whether a corresponding vertex already exists; if not, add one.
-        (if (not (.contains @existing-vertex-labels vec))
-          (do
-            (graph-add-vertex! g (str vec))
-            (reset! existing-vertex-labels (conj @existing-vertex-labels vec)))))
+      (doseq [vec (vec (take 2 vector))]        ;; For every city name we stumble upon, verify whether a corresponding vertex already exists; if not, add one.
+
+        (if (not (graph-has-vertex? g vec))
+            (graph-add-vertex! g (str vec))))
       ;; For each row in the CSV file, establish a corresponding edge within the graph.
       (graph-add-edge! g
                        (str (get vector 0))
                        (str (get vector 1))
                        (str (get vector 0) " " (get vector 1) " " (get vector 2))
-                       (Integer/parseInt (get vector 2))))))
+                       (Integer/parseInt (get vector 2)))))
 
 (csv-to-graph csv-file g)
 
@@ -91,21 +104,11 @@
       (do (println (str "Warning: No vertex found for label " label))
           []))))                                            ; Return an empty list if vertex doesn't exist
 
-;; Additional functions that might be useful
-(defn graph-has-vertex? [graph label]
-  (contains? @(:vertices graph) label))
-(defn graph-has-edge? [graph from to]
-  (contains? @(:edges graph) (graph-edge-key from to)))
-(defn graph-reset! [graph]
-  (doseq [vertex (vals @(:vertices graph))]
-    (reset! (:visited vertex) 0)))
-
-(defn get-edge-weight [graph from to]
-  (:weight (get @(:edges graph) (graph-edge-key from to))))
-
-(defn reset-costs! [graph]
-  (doseq [vertex (vals @(:vertices graph))]
-    (reset! (:cost-so-far vertex) 0)))
+(defn check-constraints [cost budget path max-flights]
+  (if (and (<= cost budget)
+           (< (- (count path) 1) max-flights))
+    true
+    false))
 
 (defn bfs-find-plans [graph start-label end-city-spec budget max-flights]
   ; Compute the cost of the start city (self-loop).
@@ -125,9 +128,7 @@
 
         ; Extract the current vertex and its cost from the last map in the path.
         (let [current-vertex (-> path last :vertex)
-              current-cost (-> path last :cost)
-              ; Fetch the data associated with the current vertex from the graph.
-              current-vertex-data (get @(:vertices graph) current-vertex)]
+              current-cost (-> path last :cost)]
 
           ; Print the current exploring path for debugging purposes.
           ;(println "Exploring path:" (vec (map :vertex path)))
@@ -135,10 +136,9 @@
           ; Check if the current vertex is a valid endpoint (matches the desired name)
           ; and the path respects the constraints (cost and number of flights).
           (when (and (and (string? end-city-spec) (= current-vertex end-city-spec))
-                     (<= current-cost budget)
-                     (<= (- (count path) 1) max-flights))
+                     (check-constraints current-cost budget path max-flights))
             ; If it's a valid plan, add it to the list of plans.
-            (reset! plans (conj @plans {:path (map (fn [p] {:city (:vertex p) :cost (:cost p)}) path) :total-cost current-cost})))
+            (swap! plans conj {:path (map (fn [p] {:city (:vertex p) :cost (:cost p)}) path) :total-cost current-cost}))
 
           ; Check if current vertex is not the destination before exploring further.
           ; If it is, do not explore the neighbors of the current vertex.
@@ -146,21 +146,17 @@
             ; Get the neighbors of the current vertex.
             (let [neighbors (graph-get-neighbors graph current-vertex)]
               (doseq [neighbor neighbors]
-                ;(println "current cost: " current-cost) Print the current cost for debugging purposes.
-                ; Determine the cost to travel from the current vertex to this neighbor.
+                ; Determine the cost to travel from the current vertex to the current neighbor.
                 (let [edge-cost (get-edge-weight graph current-vertex neighbor)
                       total-cost (+ current-cost edge-cost)]
-
                   ; Check if the neighbor hasn't been visited in this path,
-                  ; the path respects the budget, and the number of flights.
+                  ; the path respects constraints.
                   (when (and (not (some #(= neighbor (:vertex %)) path))
-                             (<= total-cost budget)
-                             (< (- (count path) 1) max-flights))
+                             (check-constraints total-cost budget path max-flights))
                     ; If valid, enqueue a new path that includes this neighbor.
                     ; Here we update the cost for the new city in the path to be the cumulative cost up to that city.
                     (dosync
                       (alter queue conj (conj path {:vertex neighbor :cost total-cost})))))))))))
-    ; conjoining to a vector is done at the end with time complexity O(1)
 
     ; Return the list of valid plans.
     @plans))
@@ -208,7 +204,7 @@
   (let [formatted-path (map (fn [{:keys [city cost]}]
                               (str city (if (zero? cost) "" (str " (" cost ")"))))
                             path)]
-    (str "Path: " (clojure.string/join " --> " formatted-path))))
+    (str (clojure.string/join " --> " formatted-path))))
 
 
 (defn reverse-engineer-costs [path]
@@ -263,18 +259,21 @@
 
 (defn choose-city [prompt graph]
   (let [cities (get-all-cities graph)]
+    (println cities)
     (println prompt)
     (doseq [[idx city] (map vector (range 1 (inc (count cities))) cities)]
       (println (str idx ". " city)))
     (let [choice-str (read-line)
           choice (if
                    (re-matches #"\d+" choice-str)
-                   (Integer/parseInt choice-str) 0)] ; Convert valid string to integer
-      (if (and (>= choice 1) (<= choice (count cities)))
-        (nth cities (dec choice))
-        (do
-          (println "Invalid choice. Please choose again.")
-          (recur prompt graph))))))
+                   (Integer/parseInt choice-str) 0)]        ; Convert valid string to integer
+      (cond (and (>= choice 1) (<= choice (count cities)))
+            (nth cities (dec choice))
+            (some #{choice-str} cities)
+            choice-str
+            :else (do
+                    (println "Invalid choice. Please choose again.")
+                    (recur prompt graph))))))
 
 
 (defn get-user-input [graph]
