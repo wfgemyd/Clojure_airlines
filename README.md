@@ -74,20 +74,16 @@ Finding flights from New York to Los Angeles with a budget of $500 and a maximum
   
 - **Customizable and Extensible Code Structure**: Tailor the application to your needs or contribute to its growth!
 
-## Limitations 
+## Limitations and Future Improvements 
 
 - **Single Data Source**: The program currently supports only one CSV data file as a data source for flight information.
+  
+- **Error Handling**: The program currently does not handle missing fields or invalid inputs (e.g., non-existent cities, negative budget values) in the dataset gracefully. Ensure that the CSV file has no missing or invalid values.
+  
+- **Limited Filtering Options**: Currently, our program is designed to output the most and least expensive flight connections.
 
-## Future Improvements
-There are several future improvements that might be considered: 
-
-- Optimize the BFS algorithm to stop exploring the neighbors further after reaching the maximum amount of layovers or exceeding the budget.
-
-- Support filtering and sorting options for flight plans, for example filtering by cheapest or most convenient flights.
-
-- Enhance the user interface for a more interactive experience.
-
-- Handle various data formats and sources for flight information.
+- **Localization**: Currently, the program only supports datasets and inputs in English. Internationalization features, such as multi-language support, are not yet implemented.
 
 ## License
 
+Clojure Airlines is licensed under the Eclipse Public License 2.0. See the LICENSE file for more details.
