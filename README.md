@@ -84,6 +84,18 @@ Finding flights from New York to Los Angeles with a budget of $500 and a maximum
 
 - **Localization**: Currently, the program only supports datasets and inputs in English. Internationalization features, such as multi-language support, are not yet implemented.
 
+## References 
+
+- Higginbotham, D. (2015). Clojure for the Brave and True: Learn the Ultimate Language and Become a Better Programmer. No Starch Press. ISBN: 9781593275914. url: https://books.google.cz/books?id=mQLPCgAAQBAJ
+  
+- ClojureDocs (2023). Community-powered Clojure documentation. url: https://clojuredocs.org/
+
+- Cormen, T.H., C.E. Leiserson, R.L. Rivest, and C. Stein (2001). Introduction To Algorithms. Mit Electrical Engineering and Computer Science. MIT Press. isbn: 9780262032933. url: https://books.google.cz/books?id=NLngYyWFl_YC
+
+- Meier, C. (2015). Living Clojure: An Introduction and Training Plan for Developers. O’Reilly Media. isbn: 9781491909294. URL: https://books.google.cz/books?id=b4odCAAAQBAJ.
+  
+- Karumanchi, N. (2011). Data Structures and Algorithms Made Easy: Data Structure and Algorithmic Puzzles. CareerMonk Publications. ISBN: 9780615459813. url: https://books.google.cz/books?id=FPIznwEACAAJ
+
 ## License
 
 Clojure Airlines is licensed under the Eclipse Public License 2.0. See the LICENSE file for more details.
