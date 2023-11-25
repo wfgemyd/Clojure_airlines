@@ -14,7 +14,6 @@
 (defn make-vertex [label]
   (Vertex. label (atom 0) (atom '()) (atom 0) (atom '())))
 
-
 ;; Adding vertices to the graph
 (defn graph-add-vertex! [graph label]
   (let [vertices (:vertices graph)
@@ -62,10 +61,12 @@
 ;; Parsing the CSV file into a sequence of sequences
 (defn take-csv
   [fname]
-  (with-open [file (io/reader fname)]
-    (-> file
-        (slurp)
-        (csv/read-csv))))
+  (if (clojure.string/ends-with? fname ".csv")
+    (with-open [file (io/reader fname)]
+      (-> file
+          (slurp)
+          (csv/read-csv)))
+    (println "Invalid file format! Please provide a CSV file as a source.")))
 (def csv-file (take-csv "src/clojure_airlines/Flights_ICA1.csv"))
 
 ;(println csv-file)
@@ -259,7 +260,7 @@
 
 (defn choose-city [prompt graph]
   (let [cities (get-all-cities graph)]
-    (println cities)
+    ;(println cities)
     (println prompt)
     (doseq [[idx city] (map vector (range 1 (inc (count cities))) cities)]
       (println (str idx ". " city)))
@@ -277,22 +278,23 @@
 
 
 (defn get-user-input [graph]
-  (let [start-city (choose-city "Where are you located?" graph)
-        end-city (choose-city "Where do you want to go to?" graph)]
-    (println "How much do you want to spend?")
-    (let [budget (Integer/parseInt (read-line))]
-      (println "How many flights can you suffer?")
-      (let [max-flights (Integer/parseInt (read-line))]
-        [start-city end-city budget max-flights]))))
-
+  (when (not (empty? @(:vertices graph)))
+    (let [start-city (choose-city "Where are you located?" graph)
+          end-city (choose-city "Where do you want to go to?" graph)]
+      (println "How much do you want to spend?")
+      (let [budget (Integer/parseInt (read-line))]
+        (println "How many flights can you suffer?")
+        (let [max-flights (+ 1 (Integer/parseInt (read-line)))]
+          [start-city end-city budget max-flights])))))
 
 (defn main [g]
+  (when (not (empty? @(:vertices g)))
   (let [[start-city end-city budget max-flights] (get-user-input g)
         plans (find-and-sort-plans g start-city end-city budget max-flights)]
-    (println (str "Searching for plans from " start-city " to " end-city " with a budget of " budget " and maximum " max-flights " flights:"))
+    (println (str "Searching for plans from " start-city " to " end-city " with a budget of " budget " and maximum " (- max-flights 1) " flights:"))
     ;(println plans)
     (if (nil? (first plans))
       (println "No valid plans found!")
-      (print-reversed-plans plans))))
+      (print-reversed-plans plans)))))
 
 (main g)
