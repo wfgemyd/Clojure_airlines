@@ -62,10 +62,11 @@
 (defn take-csv
   [fname]
   (if (clojure.string/ends-with? fname ".csv")
-    (with-open [file (io/reader fname)]
-      (-> file
-          (slurp)
-          (csv/read-csv)))
+    (try (with-open [file (io/reader fname)]
+           (-> file
+               (slurp)
+               (csv/read-csv)))
+         (catch Exception ex (println "File not found. Please place the file in the same directory as the script.")))
     (println "Invalid file format! Please provide a CSV file as a source.")))
 (def csv-file (take-csv "src/clojure_airlines/Flights_ICA1.csv"))
 
@@ -76,17 +77,17 @@
 
 ;; Converting the data obtained from parsing the scv file to the edges and vertices of the graph
 (defn csv-to-graph [csv-file g]
-    (doseq [vector csv-file]
-      (doseq [vec (vec (take 2 vector))]        ;; For every city name we stumble upon, verify whether a corresponding vertex already exists; if not, add one.
+  (doseq [vector csv-file]
+    (doseq [vec (vec (take 2 vector))]                      ;; For every city name we stumble upon, verify whether a corresponding vertex already exists; if not, add one.
 
-        (if (not (graph-has-vertex? g vec))
-            (graph-add-vertex! g (str vec))))
-      ;; For each row in the CSV file, establish a corresponding edge within the graph.
-      (graph-add-edge! g
-                       (str (get vector 0))
-                       (str (get vector 1))
-                       (str (get vector 0) " " (get vector 1) " " (get vector 2))
-                       (Integer/parseInt (get vector 2)))))
+      (if (not (graph-has-vertex? g vec))
+        (graph-add-vertex! g (str vec))))
+    ;; For each row in the CSV file, establish a corresponding edge within the graph.
+    (graph-add-edge! g
+                     (str (get vector 0))
+                     (str (get vector 1))
+                     (str (get vector 0) " " (get vector 1) " " (get vector 2))
+                     (Integer/parseInt (get vector 2)))))
 
 (csv-to-graph csv-file g)
 
@@ -289,12 +290,12 @@
 
 (defn main [g]
   (when (not (empty? @(:vertices g)))
-  (let [[start-city end-city budget max-flights] (get-user-input g)
-        plans (find-and-sort-plans g start-city end-city budget max-flights)]
-    (println (str "Searching for plans from " start-city " to " end-city " with a budget of " budget " and maximum " (- max-flights 1) " flights:"))
-    ;(println plans)
-    (if (nil? (first plans))
-      (println "No valid plans found!")
-      (print-reversed-plans plans)))))
+    (let [[start-city end-city budget max-flights] (get-user-input g)
+          plans (find-and-sort-plans g start-city end-city budget max-flights)]
+      (println (str "Searching for plans from " start-city " to " end-city " with a budget of " budget " and maximum " (- max-flights 1) " flights:"))
+      ;(println plans)
+      (if (nil? (first plans))
+        (println "No valid plans found!")
+        (print-reversed-plans plans)))))
 
 (main g)
