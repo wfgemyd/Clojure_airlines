@@ -10,9 +10,9 @@
   (Graph. (atom {}) (atom {})))
 
 ;; Defining the vertex structure
-(defrecord Vertex [label visited neighbors cost-so-far path])
+(defrecord Vertex [label neighbors path])
 (defn make-vertex [label]
-  (Vertex. label (atom 0) (atom '()) (atom 0) (atom '())))
+  (Vertex. label (atom '()) (atom '())))
 
 ;; Adding vertices to the graph
 (defn graph-add-vertex! [graph label]
@@ -47,16 +47,8 @@
   (contains? @(:vertices graph) label))
 (defn graph-has-edge? [graph from to]
   (contains? @(:edges graph) (graph-edge-key from to)))
-(defn graph-reset! [graph]
-  (doseq [vertex (vals @(:vertices graph))]
-    (reset! (:visited vertex) 0)))
-
 (defn get-edge-weight [graph from to]
   (:weight (get @(:edges graph) (graph-edge-key from to))))
-
-(defn reset-costs! [graph]
-  (doseq [vertex (vals @(:vertices graph))]
-    (reset! (:cost-so-far vertex) 0)))
 
 ;; Parsing the CSV file into a sequence of sequences
 (defn take-csv
@@ -180,8 +172,6 @@
 
 (defn find-and-sort-plans [graph start-label end-city-name budget max-flights]
   ; Reset the costs before starting the search
-  (reset-costs! graph)
-
   ; Use the BFS function to find the plans with the hard-max-flights as the constraint
   (let [raw-plans (bfs-find-plans graph start-label end-city-name budget max-flights)]
     ;(println "Raw plans:" raw-plans) ; Print raw plans here
