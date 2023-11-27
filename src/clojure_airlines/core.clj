@@ -10,9 +10,9 @@
   (Graph. (atom {}) (atom {})))
 
 ;; Defining the vertex structure
-(defrecord Vertex [label neighbors path])
+(defrecord Vertex [label neighbors])
 (defn make-vertex [label]
-  (Vertex. label (atom '()) (atom '())))
+  (Vertex. label (atom '())))
 
 ;; Adding vertices to the graph
 (defn graph-add-vertex! [graph label]
