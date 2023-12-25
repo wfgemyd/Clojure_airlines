@@ -245,6 +245,13 @@
       (print-ascii-ticket formatted-path total-cost (count path)))))
 
 
+(defn check-broker [plans]
+  (let [plan (first plans)]
+    (let [{:keys [path total-cost]} plan
+          reversed-path (reverse-engineer-costs path)
+          formatted-path (format-path reversed-path)]
+      total-cost)))
+
 (defn get-all-cities [graph]
   (keys @(:vertices graph)))
 
@@ -288,4 +295,14 @@
         (println "No valid plans found!")
         (print-reversed-plans plans)))))
 
-(main g)
+(defn main-check-broker [departure-city destination-city people]
+  (let [g g]
+    (when (not (empty? @(:vertices g)))
+      (let [budget 1000
+            max-flights 4
+            plans (find-and-sort-plans g departure-city destination-city budget max-flights)]
+        (if (nil? (first plans))
+          ##Inf
+          (check-broker plans))))))
+
+(main-check-broker "Vienna" "Budapest" [])
