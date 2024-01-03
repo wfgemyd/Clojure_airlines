@@ -5,7 +5,7 @@
   )
 
 ; TODO SET YOUR TEAM NUMBER: 1-7
-(def team_number 4)
+(def team_number 2)
 (def search_ticket_function your_engine/main-check-broker)
 (broker/run team_number search_ticket_function)
 

@@ -1,9 +1,8 @@
-(ns airlines.core
-  (:require [clojure.core.matrix :as m]
-            [clojure.data.csv :as csv]
+(ns clojure_airlines.analysis
+  (:gen-class)
+  (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
-            [clojure.string :as str])
-  (:import (org.apache.commons.math3.distribution TDistribution)))
+            [clojure.string :as str]))
 
 ; Loading and Preprocessing the CSV Data
 (defn read-csv [filename]
@@ -107,7 +106,7 @@
                              max-price-proportion)]
     predicted-sales))
 
-#probabilty calc
+;;probabilty calc
 (defn calculate-purchase-probability-with-new-analysis
   [transformed-data increase-percentage statistics success-rates future-sales-predictions]
   (let [increase-fn (fn [paid] (+ paid (* paid increase-percentage 0.01)))
@@ -180,6 +179,6 @@
       (println probability))))
 
 
-(run-analysis "F:/clojure-course/airlines/src/airlines/sales_team_4.csv" 2023 4) ;file_name current_year increase_%
+(run-analysis "/Users/anna-alexandradanchenko/Documents/University/Second Year/Symbolic Computation/Clojure_airlines/src/clojure_airlines/data/sales_team_2.csv" 2023 4) ;file_name current_year increase_%
 
 

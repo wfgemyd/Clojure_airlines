@@ -1,7 +1,8 @@
 (ns clojure_airlines.core
   (:gen-class)
   (:require [clojure.data.csv :as csv]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.string :as str]))
 ;; Adding additional dependencies
 
 ;; Defining the graph structure
@@ -295,12 +296,34 @@
         (println "No valid plans found!")
         (print-reversed-plans plans)))))
 
+;; Max flights will be hard coded for families and groups
+;; Budget is the last column in the broker dataset
+
+;; In the engine we basically check if the route in B = route in H,
+
+;; We suppose that the family has the
+(defn people-classification [people]
+  (let [surnames (atom [])
+        ysob (atom [])]
+    (doseq [person people]
+      (let [surname (second (str/split (first person) #" "))
+            yob (second person)]
+        (swap! surnames conj surname)
+        (swap! ysob conj yob)))
+    (if (and (= (count (distinct @surnames)) 1)
+             (some #(> % 2005) @ysob))
+      true
+      false)))
+
+
 (defn main-check-broker [departure-city destination-city people]
   (let [g g]
     (when (not (empty? @(:vertices g)))
       (let [budget 1000
-            max-flights 4
-            plans (find-and-sort-plans g departure-city destination-city budget max-flights)]
+            max-cities (if (people-classification people)
+                         4
+                         5)
+            plans (find-and-sort-plans g departure-city destination-city budget max-cities)]
         (if (nil? (first plans))
           ##Inf
           (check-broker plans))))))
