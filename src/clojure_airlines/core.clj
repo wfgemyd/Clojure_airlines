@@ -247,7 +247,7 @@
 
 
 (defn check-broker [plans]
-  (let [plan (first plans)]
+  (let [plan (last plans)]
     (let [{:keys [path total-cost]} plan
           reversed-path (reverse-engineer-costs path)
           formatted-path (format-path reversed-path)]
@@ -311,15 +311,47 @@
         (swap! surnames conj surname)
         (swap! ysob conj yob)))
     (if (and (= (count (distinct @surnames)) 1)
-             (some #(> % 2005) @ysob))
+             (some #(> % 2005) @ysob)
+             (some #(< % 2005) @ysob))
       true
       false)))
+
+(defn get-stats-return-budget [historical-file p-type dep dest]
+  (let [historical-data (clojure_airlines.analysis/process-csv historical-file)
+        statistics (clojure_airlines.analysis/calculate-statistics (clojure_airlines.analysis/transform-data historical-data 2024))
+        filtered-stats (atom
+                         (filter #(and (= (:departure %) dep)
+                                       (= (:destination %) dest))
+                                 statistics))
+        budget-output (atom 1000)
+        p-type-transformed (if p-type
+                             "family"
+                             "group")]
+    (if (empty? @filtered-stats)
+      (reset! filtered-stats (filter #(and (= (:departure %) dest)
+                                           (= (:destination %) dep))
+                                     statistics)))
+    (if (empty? @filtered-stats)
+      ()
+      (let [stats-for-type (filter #(= (:group-type %) p-type-transformed) @filtered-stats)]
+        (if (empty? stats-for-type)
+          ()
+          (do
+            (reset! budget-output (:max (first stats-for-type)))))))
+    @budget-output
+    ))
+
+(defn artificial-price-increase []
+  )
 
 
 (defn main-check-broker [departure-city destination-city people]
   (let [g g]
     (when (not (empty? @(:vertices g)))
-      (let [budget 1000
+      (let [budget (get-stats-return-budget "/Users/anna-alexandradanchenko/Documents/University/Second Year/Symbolic Computation/Clojure_airlines/src/clojure_airlines/data/sales_team_2.csv"
+                                            (people-classification people)
+                                            departure-city
+                                            destination-city)
             max-cities (if (people-classification people)
                          4
                          5)
@@ -328,4 +360,4 @@
           ##Inf
           (check-broker plans))))))
 
-(main-check-broker "Vienna" "Budapest" [])
+(main-check-broker "Vienna" "Warsaw" [])
