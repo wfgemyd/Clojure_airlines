@@ -329,7 +329,7 @@
                   (clojure_airlines.analysis/mean
                     (map :mean
                          (filter #(= (:group-type %) p-type-transformed) statistics))))
-          (reset! budget-output (:max (first stats-for-type))))))
+          (reset! budget-output (:mean (first stats-for-type))))))
     (println "PREDICTED BUDGET IS: " @budget-output)
     @budget-output
     ))
@@ -344,6 +344,8 @@
       ;;(println "FOR PATH: " formatted-path)
       total-cost)))
 
+(def total-profit (atom 0))
+
 (defn main-check-broker [departure-city destination-city people]
   (let [g g]
     (when (not (empty? @(:vertices g)))
@@ -357,12 +359,16 @@
                          5)
             plans (find-and-sort-plans g departure-city destination-city budget max-cities)]
         (if (nil? (first plans))
-          ##Inf
+          (do
+            (println "NO PLANS FOUND")
+            ##Inf)
           ;; Let's round up the budget to the nearest lowest 100 and sell the tickets by the budget
           (do
             (println "TICKET PRICE IS: " (check-broker plans))
             (println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
             (println "PROFIT IS: " (- rounded-budget (check-broker plans)))
+            (reset! total-profit (+ @total-profit (- rounded-budget (check-broker plans))))
             rounded-budget))))))
-
 (main-check-broker "Vienna" "Warsaw" [])
+(println @total-profit)
+(reset! total-profit 0)
