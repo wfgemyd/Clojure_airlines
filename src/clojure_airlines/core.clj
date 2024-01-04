@@ -245,14 +245,6 @@
           formatted-path (format-path reversed-path)]
       (print-ascii-ticket formatted-path total-cost (count path)))))
 
-
-(defn check-broker [plans]
-  (let [plan (last plans)]
-    (let [{:keys [path total-cost]} plan
-          reversed-path (reverse-engineer-costs path)
-          formatted-path (format-path reversed-path)]
-      total-cost)))
-
 (defn get-all-cities [graph]
   (keys @(:vertices graph)))
 
@@ -296,8 +288,6 @@
         (println "No valid plans found!")
         (print-reversed-plans plans)))))
 
-;; Max flights will be hard coded for families and groups
-;; Budget is the last column in the broker dataset
 
 ;; In the engine we basically check if the route in B = route in H,
 
@@ -332,18 +322,27 @@
                                            (= (:destination %) dep))
                                      statistics)))
     (if (empty? @filtered-stats)
-      ()
+      (reset! budget-output (clojure_airlines.analysis/mean (map :mean statistics)))
       (let [stats-for-type (filter #(= (:group-type %) p-type-transformed) @filtered-stats)]
         (if (empty? stats-for-type)
-          ()
-          (do
-            (reset! budget-output (:max (first stats-for-type)))))))
+          (reset! budget-output
+                  (clojure_airlines.analysis/mean
+                    (map :mean
+                         (filter #(= (:group-type %) p-type-transformed) statistics))))
+          (reset! budget-output (:max (first stats-for-type))))))
+    (println "PREDICTED BUDGET IS: " @budget-output)
     @budget-output
     ))
 
-(defn artificial-price-increase []
-  )
 
+(defn check-broker [plans]
+  (let [plan (last plans)]
+    (let [{:keys [path total-cost]} plan
+          reversed-path (reverse-engineer-costs path)
+          formatted-path (format-path reversed-path)]
+      ;;(println "TOTAL COST: " total-cost)
+      ;;(println "FOR PATH: " formatted-path)
+      total-cost)))
 
 (defn main-check-broker [departure-city destination-city people]
   (let [g g]
@@ -352,12 +351,18 @@
                                             (people-classification people)
                                             departure-city
                                             destination-city)
+            rounded-budget (* 100 (Math/floor (/ budget 100)))
             max-cities (if (people-classification people)
                          4
                          5)
             plans (find-and-sort-plans g departure-city destination-city budget max-cities)]
         (if (nil? (first plans))
           ##Inf
-          (check-broker plans))))))
+          ;; Let's round up the budget to the nearest lowest 100 and sell the tickets by the budget
+          (do
+            (println "TICKET PRICE IS: " (check-broker plans))
+            (println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
+            (println "PROFIT IS: " (- rounded-budget (check-broker plans)))
+            rounded-budget))))))
 
 (main-check-broker "Vienna" "Warsaw" [])
