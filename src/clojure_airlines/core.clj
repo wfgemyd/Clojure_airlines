@@ -288,10 +288,6 @@
         (println "No valid plans found!")
         (print-reversed-plans plans)))))
 
-
-;; In the engine we basically check if the route in B = route in H,
-
-;; We suppose that the family has the
 (defn people-classification [people]
   (let [surnames (atom [])
         ysob (atom [])]
@@ -329,11 +325,10 @@
                   (clojure_airlines.analysis/mean
                     (map :mean
                          (filter #(= (:group-type %) p-type-transformed) statistics))))
-          (reset! budget-output (:mean (first stats-for-type))))))
+          (reset! budget-output (:max (first stats-for-type))))))
     (println "PREDICTED BUDGET IS: " @budget-output)
     @budget-output
     ))
-
 
 (defn check-broker [plans]
   (let [plan (last plans)]
@@ -353,22 +348,28 @@
                                             (people-classification people)
                                             departure-city
                                             destination-city)
+            ;; Let's round up the budget to the nearest lowest 100 so that we can sell more tickets.
             rounded-budget (* 100 (Math/floor (/ budget 100)))
             max-cities (if (people-classification people)
                          4
                          5)
-            plans (find-and-sort-plans g departure-city destination-city budget max-cities)]
+            plans (find-and-sort-plans g departure-city destination-city budget max-cities)
+            ticket-price (check-broker plans)]
         (if (nil? (first plans))
           (do
             (println "NO PLANS FOUND")
             ##Inf)
-          ;; Let's round up the budget to the nearest lowest 100 and sell the tickets by the budget
           (do
-            (println "TICKET PRICE IS: " (check-broker plans))
-            (println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
-            (println "PROFIT IS: " (- rounded-budget (check-broker plans)))
-            (reset! total-profit (+ @total-profit (- rounded-budget (check-broker plans))))
-            rounded-budget))))))
+            (if (< rounded-budget ticket-price)
+              (do
+                (println "BUDGET IS TOO LOW, CAN'T SELL TICKET")
+                ##Inf)
+              (do
+                (println "TICKET PRICE IS: " ticket-price)
+                (println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
+                (println "PROFIT IS: " (- rounded-budget ticket-price))
+                (reset! total-profit (+ @total-profit (- rounded-budget ticket-price)))
+                rounded-budget))))))))
 (main-check-broker "Vienna" "Warsaw" [])
 (println @total-profit)
 (reset! total-profit 0)
