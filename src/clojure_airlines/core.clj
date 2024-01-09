@@ -330,8 +330,10 @@
     @budget-output
     ))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn check-broker [plans]
-  (let [plan (last plans)]
+  (let [plan (first plans)]
     (let [{:keys [path total-cost]} plan
           reversed-path (reverse-engineer-costs path)
           formatted-path (format-path reversed-path)]
@@ -357,12 +359,12 @@
             ticket-price (check-broker plans)]
         (if (nil? (first plans))
           (do
-            (println "NO PLANS FOUND")
+            ;;(println "NO PLANS FOUND")
             ##Inf)
           (do
             (if (< rounded-budget ticket-price)
               (do
-                (println "BUDGET IS TOO LOW, CAN'T SELL TICKET")
+                ;;(println "BUDGET IS TOO LOW, CAN'T SELL TICKET")
                 ##Inf)
               (do
                 (println "TICKET PRICE IS: " ticket-price)
@@ -370,6 +372,35 @@
                 (println "PROFIT IS: " (- rounded-budget ticket-price))
                 (reset! total-profit (+ @total-profit (- rounded-budget ticket-price)))
                 rounded-budget))))))))
-(main-check-broker "Vienna" "Warsaw" [])
 (println @total-profit)
 (reset! total-profit 0)
+
+;; Cheap Ticket and Minimum Budget
+;Sold tickets: 485 piece(s)
+;Earned: 123600
+;; 46600.0
+
+;; Cheap Ticket and Average Budget
+;Sold tickets: 452 piece(s)
+;Earned: 116600
+;; 54700.0
+
+;; Cheap Ticket and Maximum Budget
+;Sold tickets: 467 piece(s)
+;Earned: 128000
+;; 61200.0
+
+;; The most expensive ticket and Minimum Budget
+;Sold tickets: 485 piece(s)
+;Earned: 123600
+;; 0.0
+
+;; The most expensive ticket and Average Budget
+;; Sold tickets: 452 piece(s)
+;; Earned: 116600
+;; 10000.0
+
+;; The most expensive ticket and Maximum Budget
+;; Sold tickets: 467 piece(s)
+;; Earned: 128000
+;; 11000.0
