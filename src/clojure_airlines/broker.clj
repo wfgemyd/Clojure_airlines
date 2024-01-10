@@ -10,7 +10,7 @@
 
 (defn run
   [team_number search_function]
-  (let [data_file_name (str "src/clojure_course/datasets/broker/data/broker_team_" team_number ".csv")]
+  (let [data_file_name (str "src/clojure_airlines/data/broker_team_" team_number ".csv")]
     (if (.exists (io/as-file data_file_name))
       (let [data (read_data data_file_name)
             departure (atom "")
