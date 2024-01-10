@@ -267,7 +267,6 @@
                     (println "Invalid choice. Please choose again.")
                     (recur prompt graph))))))
 
-
 (defn get-user-input [graph]
   (when (not (empty? @(:vertices graph)))
     (let [start-city (choose-city "Where are you located?" graph)
@@ -326,12 +325,9 @@
                     (map :mean
                          (filter #(= (:group-type %) p-type-transformed) statistics))))
           (reset! budget-output (:max (first stats-for-type))))))
-    (println "PREDICTED BUDGET IS: " @budget-output)
+    ;;(println "PREDICTED BUDGET IS: " @budget-output)
     @budget-output
     ))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn check-broker [plans]
   (let [plan (first plans)]
     (let [{:keys [path total-cost]} plan
@@ -343,34 +339,49 @@
 
 (def total-profit (atom 0))
 
+;; Main-check-broker is the search function that is called by the broker program.
+;; It returns the price of the ticket that will be sold to the customer.
 (defn main-check-broker [departure-city destination-city people]
   (let [g g]
     (when (not (empty? @(:vertices g)))
+      ;; Get statistics from the historical data and return the predicted budget for the customer.
       (let [budget (get-stats-return-budget "/Users/anna-alexandradanchenko/Documents/University/Second Year/Symbolic Computation/Clojure_airlines/src/clojure_airlines/data/sales_team_2.csv"
+                                            ;; Classify whether the customers belong to a family or a group
                                             (people-classification people)
                                             departure-city
                                             destination-city)
-            ;; Let's round up the budget to the nearest lowest 100 so that we can sell more tickets.
+            ;; Rounding up the budget to the nearest lowest 100 to ensure that the ticket will be sold.
             rounded-budget (* 100 (Math/floor (/ budget 100)))
+            ;; If the group is a family, the maximum number of flights is 3, otherwise it is 4.
             max-cities (if (people-classification people)
                          4
                          5)
+            ;; Find the plans that match the customer's budget and the maximum number of flights.
             plans (find-and-sort-plans g departure-city destination-city budget max-cities)
+            ;; Get the actual price of the cheapest ticket that we have.
             ticket-price (check-broker plans)]
+
+        ;; If there is no plans found, it returns ##Inf, to ensure that the broker will not sell non-existing ticket.
         (if (nil? (first plans))
           (do
-            ;;(println "NO PLANS FOUND")
+            ;;(println "NO PLANS FOUND" departure-city "to" destination-city)
             ##Inf)
           (do
+            ;; If the customer budget is too low, the function returns ##Inf
+            ;; In order to ensure that there won't be negative profit (the broker won't sell ticket for infinite money).
             (if (< rounded-budget ticket-price)
               (do
                 ;;(println "BUDGET IS TOO LOW, CAN'T SELL TICKET")
                 ##Inf)
               (do
-                (println "TICKET PRICE IS: " ticket-price)
-                (println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
-                (println "PROFIT IS: " (- rounded-budget ticket-price))
+                ;;(println "TICKET PRICE IS: " ticket-price)
+                ;;(println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
+                ;;(println "PROFIT IS: " (- rounded-budget ticket-price))
+
+                ;; Here, we calcualte the maximum clean profit we can aquire if all the tickets will be sold.
+                ;; We can not calculate the real profit, as we don't know which tickets will be sold, the broker function does not return that.
                 (reset! total-profit (+ @total-profit (- rounded-budget ticket-price)))
+                (println "TOTAL PROFIT" @total-profit)
                 rounded-budget))))))))
 (println @total-profit)
 (reset! total-profit 0)
@@ -404,3 +415,9 @@
 ;; Sold tickets: 467 piece(s)
 ;; Earned: 128000
 ;; 11000.0
+
+;; TODO Sell as much tickets as you can
+;; TODO Groups will buy for the maximum price, Families plan from advance,
+
+;; Zagreb to Krakow
+;TODO NO PLANS FOUND WRITE ABOUT IT IN THE REPORT
