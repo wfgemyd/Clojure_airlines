@@ -281,7 +281,10 @@
   (when (not (empty? @(:vertices g)))
     (let [[start-city end-city budget max-flights] (get-user-input g)
           plans (find-and-sort-plans g start-city end-city budget max-flights)]
-      (println (str "Searching for plans from " start-city " to " end-city " with a budget of " budget " and maximum " (- max-flights 1) " flights:"))
+      (println (str "Searching for plans from " start-city " to " end-city
+                    " with a budget of " budget
+                    " and maximum " (- max-flights 1)
+                    " flights:"))
       ;(println plans)
       (if (nil? (first plans))
         (println "No valid plans found!")
@@ -346,8 +349,7 @@
 
       ;; If the historical data for this route and group type exists, we set the budget to
       ;; the maximum amount of money that was spent historically for this route and group type.
-        (reset! budget-output
-              (:max (first (filter #(= (:group-type %) p-type-transformed) @filtered-stats)))))
+        (reset! budget-output (:max (first (filter #(= (:group-type %) p-type-transformed) @filtered-stats)))))
     ;;(println "PREDICTED BUDGET IS: " @budget-output)
     @budget-output
     ))
@@ -369,7 +371,7 @@
   (let [g g]
     (when (not (empty? @(:vertices g)))
       ;; Get statistics from the historical data and return the predicted budget for the customer.
-      (let [budget (get-stats-return-budget "/Users/anna-alexandradanchenko/Documents/University/Second Year/Symbolic Computation/Clojure_airlines/src/clojure_airlines/data/sales_team_2.csv"
+      (let [budget (get-stats-return-budget "src/clojure_airlines/data/sales_team_2.csv"
                                             ;; Classify whether the customers belong to a family or a group
                                             (people-classification people)
                                             departure-city
@@ -405,8 +407,8 @@
                 ;; Here, we calculate the maximum clean profit we can acquire if all the tickets will be sold.
                 ;; We can not calculate the real profit, as we don't know which tickets will be sold, the broker function does not return that.
                 (reset! total-profit (+ @total-profit (- rounded-budget ticket-price)))
-                (println "TOTAL PROFIT" @total-profit)
-                rounded-budget))))))))
+                ;;(println "TOTAL PROFIT" @total-profit)
+                0))))))))
 
 ;; If you want to output the total clean profit for the company in the case if all of the tickets will are sold, uncomment the following line.
 (println @total-profit)
