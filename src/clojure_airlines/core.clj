@@ -287,6 +287,7 @@
         (println "No valid plans found!")
         (print-reversed-plans plans)))))
 
+;; People classification function returns true if the group is a family, false otherwise.
 (defn people-classification [people]
   (let [surnames (atom [])
         ysob (atom [])]
@@ -295,12 +296,16 @@
             yob (second person)]
         (swap! surnames conj surname)
         (swap! ysob conj yob)))
+    ;; The 2006 is hardcoded, as there is no specific function in clojure to retrieve the current year.
+    ;; If the group consists of at least one child and one adult, and all the people have the same surname, the group is a family.
+    ;; The departure and destination of the people in the group is always the same, as it is defined in the broker program.
     (if (and (= (count (distinct @surnames)) 1)
-             (some #(> % 2005) @ysob)
-             (some #(< % 2005) @ysob))
+             (some #(> % 2006) @ysob)
+             (some #(< % 2006) @ysob))
       true
       false)))
 
+;; The following function retrieves the data from the analysis file and predicts the budget based on it for each customer group.
 (defn get-stats-return-budget [historical-file p-type dep dest]
   (let [historical-data (clojure_airlines.analysis/process-csv historical-file)
         statistics (clojure_airlines.analysis/calculate-statistics (clojure_airlines.analysis/transform-data historical-data 2024))
@@ -308,33 +313,52 @@
                          (filter #(and (= (:departure %) dep)
                                        (= (:destination %) dest))
                                  statistics))
+        ;; The default budget is 1000, if the error occurs and there would be no statistics found.
         budget-output (atom 1000)
         p-type-transformed (if p-type
                              "family"
-                             "group")]
+                             "group")
+        ;; Mean of all the historically bought tickets for the specific group type and all the routes.
+        stats-for-type-general (try
+                                 (clojure_airlines.analysis/mean
+                                 (map :mean
+                                      (filter #(= (:group-type %) p-type-transformed) statistics)))
+                                 ;; Set to 0 if the error occurs (no statistics found).
+                                 (catch Exception e
+                                   0))]
+
+    ;; If the departure and destination are swapped, we still consider it as the same route.
     (if (empty? @filtered-stats)
       (reset! filtered-stats (filter #(and (= (:departure %) dest)
                                            (= (:destination %) dep))
                                      statistics)))
-    (if (empty? @filtered-stats)
-      (reset! budget-output (clojure_airlines.analysis/mean (map :mean statistics)))
-      (let [stats-for-type (filter #(= (:group-type %) p-type-transformed) @filtered-stats)]
-        (if (empty? stats-for-type)
-          (reset! budget-output
-                  (clojure_airlines.analysis/mean
-                    (map :mean
-                         (filter #(= (:group-type %) p-type-transformed) statistics))))
-          (reset! budget-output (:max (first stats-for-type))))))
+
+    ;; If there is no route even after swapping departure and destination OR
+    ;; If there is no historical data for this route and for this specific group type:
+    (if (or (empty? @filtered-stats) (empty? (filter #(= (:group-type %) p-type-transformed) @filtered-stats)))
+      (do
+        ;; We proceed to check whether there is a data for all the routes for this specific group type.
+        (if (= 0 stats-for-type-general)
+          ;; If there is no, the budget is set to the mean of all the historical prices, for all destinations and group types.
+          (reset! budget-output (clojure_airlines.analysis/mean (map :mean statistics)))
+          ;; If there is, we set the budget to the mean of the historical prices for this specific group type, for all the routes.
+          (reset! budget-output stats-for-type-general)))
+
+      ;; If the historical data for this route and group type exists, we set the budget to
+      ;; the maximum amount of money that was spent historically for this route and group type.
+        (reset! budget-output
+              (:max (first (filter #(= (:group-type %) p-type-transformed) @filtered-stats)))))
     ;;(println "PREDICTED BUDGET IS: " @budget-output)
     @budget-output
     ))
+
+;; This function retrieves the cheapest ticket price from the plans that were found.
 (defn check-broker [plans]
-  (let [plan (first plans)]
-    (let [{:keys [path total-cost]} plan
-          reversed-path (reverse-engineer-costs path)
-          formatted-path (format-path reversed-path)]
+  (let [plan (last plans)]
+    (let [{:keys [path total-cost]} plan]
       ;;(println "TOTAL COST: " total-cost)
       ;;(println "FOR PATH: " formatted-path)
+
       total-cost)))
 
 (def total-profit (atom 0))
@@ -378,11 +402,13 @@
                 ;;(println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
                 ;;(println "PROFIT IS: " (- rounded-budget ticket-price))
 
-                ;; Here, we calcualte the maximum clean profit we can aquire if all the tickets will be sold.
+                ;; Here, we calculate the maximum clean profit we can acquire if all the tickets will be sold.
                 ;; We can not calculate the real profit, as we don't know which tickets will be sold, the broker function does not return that.
                 (reset! total-profit (+ @total-profit (- rounded-budget ticket-price)))
                 (println "TOTAL PROFIT" @total-profit)
                 rounded-budget))))))))
+
+;; If you want to output the total clean profit for the company in the case if all of the tickets will are sold, uncomment the following line.
 (println @total-profit)
 (reset! total-profit 0)
 
