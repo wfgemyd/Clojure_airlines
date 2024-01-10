@@ -85,7 +85,6 @@
 (csv-to-graph csv-file g)
 
 ;; Uncomment to see the edges and vertices of the graph
-
 ;(doseq [vertex @(:vertices g)]
 ;  (println vertex))
 ;
@@ -233,8 +232,8 @@
         ;; Mean of all the historically bought tickets for the specific group type and all the routes.
         stats-for-type-general (try
                                  (clojure_airlines.analysis/mean
-                                 (map :mean
-                                      (filter #(= (:group-type %) p-type-transformed) statistics)))
+                                   (map :mean
+                                        (filter #(= (:group-type %) p-type-transformed) statistics)))
                                  ;; Set to 0 if the error occurs (no statistics found).
                                  (catch Exception e
                                    0))]
@@ -252,7 +251,7 @@
 
       ;; If the historical data for this route and group type exists, we set the budget to
       ;; the maximum amount of money that was spent historically for this route and group type.
-        (reset! budget-output (:max (first (filter #(= (:group-type %) p-type-transformed) filtered-stats)))))
+      (reset! budget-output (:max (first (filter #(= (:group-type %) p-type-transformed) filtered-stats)))))
     ;;(println "PREDICTED BUDGET IS: " @budget-output)
     @budget-output
     ))
@@ -290,28 +289,30 @@
             ;; Get the actual price of the cheapest ticket that we have.
             ticket-price (check-broker plans)]
 
-        ;; If there is no plans found, it returns ##Inf, to ensure that the broker will not sell non-existing ticket.
-        (if (nil? (first plans))
-          (do
-            ;;(println "NO PLANS FOUND" departure-city "to" destination-city)
-            ##Inf)
-          (do
-            ;; If the customer budget is too low, the function returns ##Inf
-            ;; In order to ensure that there won't be negative profit (the broker won't sell ticket for infinite money).
-            (if (< rounded-budget ticket-price)
-              (do
-                ;;(println "BUDGET IS TOO LOW, CAN'T SELL TICKET")
-                ##Inf)
-              (do
-                ;;(println "TICKET PRICE IS: " ticket-price)
-                ;;(println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
-                ;;(println "PROFIT IS: " (- rounded-budget ticket-price))
+        (cond
+          ;; If there is no plans found, it returns ##Inf, to ensure that the broker will not sell non-existing ticket.
+          (nil? (first plans)) (do
+                                 ;;(println "NO PLANS FOUND" departure-city "to" destination-city)
+                                 ##Inf)
 
-                ;; Here, we calculate the maximum clean profit we can acquire if all the tickets will be sold.
-                ;; We can not calculate the real profit, as we don't know which tickets will be sold, the broker function does not return that.
-                (reset! total-profit (+ @total-profit (* (- rounded-budget ticket-price) (count people))))
-                (println "TOTAL PROFIT" @total-profit)
-                rounded-budget))))))))
+          ;; If the customer budget is too low, the function returns ##Inf
+          ;; in order to ensure that there won't be negative profit (the broker won't sell ticket for infinite money).
+          (< rounded-budget ticket-price) (do
+                                            ;;(println "BUDGET IS TOO LOW, CAN'T SELL TICKET")
+                                            ##Inf)
+
+          :else
+          (do
+            ;;(println "TICKET PRICE IS: " ticket-price)
+            ;;(println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
+            ;;(println "PROFIT IS: " (* (- rounded-budget ticket-price) (count people)))
+
+            ;; Here, we calculate the maximum clean profit we can acquire if all the tickets will be sold.
+            ;; We can not calculate the real profit, as we don't know which tickets will be sold, the broker function does not return that.
+            (reset! total-profit (+ @total-profit (* (- rounded-budget ticket-price) (count people))))
+            ;;(println "TOTAL PROFIT" @total-profit)
+            rounded-budget))))))
+
 
 ;; If you want to output the total clean profit for the company in the case if all the tickets will are sold, uncomment the following line.
 (println @total-profit)
