@@ -81,26 +81,31 @@
                    :success-rate success-rate})))
          (into []))))
 
-;predicting by prev data
+;; Function to predict future sales based on demand
 (defn predict-future-sales-with-demand [transformed-data]
   (let [grouped-by-route (group-by #(vector (:departure %) (:destination %)) transformed-data)
         max-prices (->> grouped-by-route
                         (map (fn [[k v]] [k (apply max (map :paid v))]))
                         (into {}))
+        ;; Adding a keyword flag to each map with data, indicating whether the paid price is the maximum price for the specific departure-destination route.
         with-max-price-flag (map #(assoc % :max-price-sold (= (:paid %)
                                                               (get max-prices [(:departure %) (:destination %)])))
                                  transformed-data)
+
         grouped-by-category (group-by #(vector (:relation %) (:departure %) (:destination %))
                                       with-max-price-flag)
+
         max-price-proportion (->> grouped-by-category
                                   (map (fn [[k v]]
                                          (let [total (count v)
                                                max-price-sold-count (count (filter :max-price-sold v))]
                                            [k (float (/ max-price-sold-count total))])))
                                   (into {}))
+        ; Counting total sales for each category.
         total-sales (->> grouped-by-category
                          (map (fn [[k v]] [k (count v)]))
                          (into {}))
+
         predicted-sales (map (fn [[k max-price-prop]]
                                (let [total (get total-sales k)]
                                  {:group-type (nth k 0)

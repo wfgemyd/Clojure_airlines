@@ -251,14 +251,14 @@
 
       ;; If the historical data for this route and group type exists, we set the budget to
       ;; the maximum amount of money that was spent historically for this route and group type.
-      (reset! budget-output (:max (first (filter #(= (:group-type %) p-type-transformed) filtered-stats)))))
+      (reset! budget-output (:median (first (filter #(= (:group-type %) p-type-transformed) filtered-stats)))))
     ;;(println "PREDICTED BUDGET IS: " @budget-output)
     @budget-output
     ))
 
 ;; This function retrieves the cheapest ticket price from the plans that were found.
 (defn check-broker [plans]
-  (let [plan (last plans)]
+  (let [plan (first plans)]
     (let [{:keys [path total-cost]} plan]
       ;;(println "TOTAL COST: " total-cost)
       ;;(println "FOR PATH: " formatted-path)
@@ -318,48 +318,50 @@
 (println @total-profit)
 (reset! total-profit 0)
 
-;; Cheap Ticket and Minimum Budget //
-;TOTAL PROFIT 1339800.0
-;Sold tickets: 485 piece(s)
-;Earned: 447300.0
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;          HYPOTHESIS TESTS           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Cheap Ticket and Minimum Budget
+;; MAX TOTAL PROFIT 1735600.0
+;; Sold tickets: 606 piece(s)
+;; Earned: 545500.0
 
 ;; Cheap Ticket and Average Budget
-;TOTAL PROFIT 1330100.0
-;Sold tickets: 452 piece(s)
-;Earned: 447300.0
+;MAX TOTAL PROFIT 1729400.0
+;Sold tickets: 559 piece(s)
+;Earned: 545700.0
 
-;; Cheap Ticket and Maximum Budget //
-;TOTAL PROFIT 1432200.0
-;Sold tickets: 467 piece(s)
-;Earned: 470300.0
+;; Cheap Ticket and Maximum Budget
+;MAX TOTAL PROFIT 1865800.0
+;Sold tickets: 586 piece(s)
+;Earned: 582900.0
 
-;; Cheap Ticket and Median Budget //
-;TOTAL PROFIT 1432200.0
-;Sold tickets: 467 piece(s)
-;Earned: 470300.0
+;; Cheap Ticket and Median Budget
+;MAX TOTAL PROFIT 1865800.0
+;Sold tickets: 562 piece(s)
+;Earned: 561300.0
 
-
-
-
-
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;        MOST EXPENSIVE TICKET        ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; The most expensive ticket and Minimum Budget
-;Sold tickets: 485 piece(s)
-;Earned: 123600
-;; 0.0
+;; MAX TOTAL PROFIT 0.0
+;; Sold tickets: 606 piece(s)
+;; Earned: 545500.0
 
 ;; The most expensive ticket and Average Budget
-;; Sold tickets: 452 piece(s)
-;; Earned: 116600
-;; 10000.0
+;; MAX TOTAL PROFIT 63000.0
+;; Sold tickets: 559 piece(s)
+;; Earned: 545700.0
 
 ;; The most expensive ticket and Maximum Budget
-;; Sold tickets: 467 piece(s)
-;; Earned: 128000
-;; 11000.0
+;; MAX TOTAL PROFIT 134500.0
+;; Sold tickets: 586 piece(s)
+;; Earned: 582900.0
 
-;; TODO Groups will buy for the maximum price, Families plan from advance,
-
-;; Zagreb to Krakow
-;TODO NO PLANS FOUND WRITE ABOUT IT IN THE REPORT
+;; The most expensive ticket and Median Budget
+;; MAX TOTAL PROFIT 134500.0
+;; Sold tickets: 562 piece(s)
+;; Earned: 561300.0
