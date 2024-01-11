@@ -179,6 +179,6 @@
       (println probability))))
 
 
-(run-analysis "/Users/anna-alexandradanchenko/Documents/University/Second Year/Symbolic Computation/Clojure_airlines/src/clojure_airlines/data/sales_team_2.csv" 2023 4) ;file_name current_year increase_%
+(run-analysis "src/clojure_airlines/data/sales_team_2.csv" 2023 4) ;file_name current_year increase_%
 
 
