@@ -36,13 +36,17 @@
 ; Utility Functions
 (defn adult? [age] (>= age 18))
 
-; Identifying Families and Groups
+; Identifying Families
+; The group is a family if:
 (defn identify-family-group [transformed-data]
+  ; ; 1. Departure, destination and surnames are the same
   (let [grouped-by-common-traits (group-by #(vector (:surname %) (:departure %) (:destination %) (:paid %)) transformed-data)]
+    ;; Otherwise, identify as a group
     (mapcat (fn [[_ group]]
               (let [adults (filter #(adult? (:age %)) group)
                     children (remove #(adult? (:age %)) group)]
-                (if (and (>= (count adults) 2) (>= (count children) 1))
+                ; ; 2. There are at least one adult and one child in the group
+                (if (and (>= (count adults) 1) (>= (count children) 1))
                   (map #(assoc % :relation "family") group)
                   (map #(assoc % :relation "group") group))))
             grouped-by-common-traits)))
@@ -53,7 +57,9 @@
        (map #(-> % (split-name) (calculate-age current-year)))
        (identify-family-group)))
 
-; calculating the pracentage of max price purchase
+;;(println (transform-data (process-csv "src/clojure_airlines/data/sales_team_2.csv") 2023))
+
+; calculating the percentage of max price purchase
 (defn calculate-success-rates [transformed-data]
   (let [grouped-by-route (group-by #(vector (:departure %) (:destination %)) transformed-data)
         max-prices (->> grouped-by-route
@@ -139,7 +145,8 @@
   (let [sum (reduce + 0 values)
         count (count values)]
     (/ sum count)))
-;basic calculations
+
+; A function to calculate mean, max, min, median and demand values for each group type and route
 (defn calculate-statistics [transformed-data]
   (let [grouped-data (group-by #(vector (:relation %) (:departure %) (:destination %)) transformed-data)
         calculate-stats (fn [[k v]]
@@ -152,6 +159,7 @@
                                 max-val (apply max paid-values)
                                 min-val (apply min paid-values)
                                 mean-val (mean paid-values)
+                                ;; demand is the number of tickets sold
                                 count-val (count paid-values)]
                             {:group-type (nth k 0)
                              :departure (nth k 1)
