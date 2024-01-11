@@ -333,6 +333,17 @@
 ;Sold tickets: 467 piece(s)
 ;Earned: 470300.0
 
+;; Cheap Ticket and Median Budget //
+;TOTAL PROFIT 1432200.0
+;Sold tickets: 467 piece(s)
+;Earned: 470300.0
+
+
+
+
+
+
+
 ;; The most expensive ticket and Minimum Budget
 ;Sold tickets: 485 piece(s)
 ;Earned: 123600

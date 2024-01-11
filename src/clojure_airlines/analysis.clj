@@ -144,9 +144,14 @@
   (let [grouped-data (group-by #(vector (:relation %) (:departure %) (:destination %)) transformed-data)
         calculate-stats (fn [[k v]]
                           (let [paid-values (map :paid v)
+                                sorted-values (sort paid-values)
+                                median-val (if (odd? (count sorted-values))
+                                             (nth sorted-values (quot (count sorted-values) 2))
+                                             (mean [(nth sorted-values (quot (count sorted-values) 2))
+                                                    (nth sorted-values (dec (quot (count sorted-values) 2)))]))
                                 max-val (apply max paid-values)
                                 min-val (apply min paid-values)
-                                mean-val (mean paid-values) ; Using the custom mean function
+                                mean-val (mean paid-values)
                                 count-val (count paid-values)]
                             {:group-type (nth k 0)
                              :departure (nth k 1)
@@ -154,8 +159,10 @@
                              :max max-val
                              :min min-val
                              :mean mean-val
+                             :median median-val
                              :count count-val}))]
     (map calculate-stats grouped-data)))
+
 
 ;main
 (defn run-analysis [filename current-year increase-percentage]
