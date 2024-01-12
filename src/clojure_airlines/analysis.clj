@@ -200,5 +200,3 @@
 
 
 (run-analysis "src/clojure_airlines/data/sales_team_2.csv" 2023 4) ;file_name current_year increase_%
-
-
