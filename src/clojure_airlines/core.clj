@@ -61,7 +61,7 @@
                (csv/read-csv)))
          (catch Exception ex (println "File not found. Please place the file in the same directory as the script.")))
     (println "Invalid file format! Please provide a CSV file as a source.")))
-(def csv-file (take-csv "src/clojure_airlines/Flights_ICA1.csv"))
+(def csv-file (take-csv "src/clojure_airlines/data/Flights_ICA1.csv"))
 
 ;(println csv-file)
 
@@ -251,14 +251,14 @@
 
       ;; If the historical data for this route and group type exists, we set the budget to
       ;; the maximum amount of money that was spent historically for this route and group type.
-      (reset! budget-output (:median (first (filter #(= (:group-type %) p-type-transformed) filtered-stats)))))
+      (reset! budget-output (:max (first (filter #(= (:group-type %) p-type-transformed) filtered-stats)))))
     ;;(println "PREDICTED BUDGET IS: " @budget-output)
     @budget-output
     ))
 
 ;; This function retrieves the cheapest ticket price from the plans that were found.
 (defn check-broker [plans]
-  (let [plan (first plans)]
+  (let [plan (last plans)]
     (let [{:keys [path total-cost]} plan]
       ;;(println "TOTAL COST: " total-cost)
       ;;(println "FOR PATH: " formatted-path)

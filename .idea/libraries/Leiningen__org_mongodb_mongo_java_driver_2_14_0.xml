@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.mongodb/mongo-java-driver:2.14.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mongodb/mongo-java-driver/2.14.0/mongo-java-driver-2.14.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
