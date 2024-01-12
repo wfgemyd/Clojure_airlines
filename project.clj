@@ -7,7 +7,8 @@
                  [org.clojure/data.csv "1.0.1"]
                  [net.mikera/core.matrix "0.62.0"]
                  [net.mikera/vectorz-clj "0.48.0"]
-                 [org.apache.commons/commons-math3 "3.5"]]
+                 [org.apache.commons/commons-math3 "3.5"]
+                 [incanter "1.9.3"]]
   :main ^:skip-aot clojure-airlines.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
