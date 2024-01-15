@@ -16,6 +16,10 @@ The program is structured as follows:
 
 - **Sorting and Optimization**: Sorts flight plans by cost and flight count, eliminating duplicates.
 
+- **User Analysis**: Categorizes the user into one of the groups, either _"family"_ or _"group"_.
+
+- **Historical Flights Sales Analysis**: Accepts the user characteristics, conducts a basic analysis of the historical sales and returns predicted budget of the user based on the route they chose and the group type they belong to. 
+
 
 ## Usage 
 
