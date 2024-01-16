@@ -61,7 +61,7 @@
                (csv/read-csv)))
          (catch Exception ex (println "File not found. Please place the file in the same directory as the script.")))
     (println "Invalid file format! Please provide a CSV file as a source.")))
-(def csv-file (take-csv "src/clojure_airlines/Flights_ICA1.csv"))
+(def csv-file (take-csv "src/clojure_airlines/data/Flights_ICA1.csv"))
 
 ;(println csv-file)
 
@@ -212,8 +212,8 @@
 
 ;; The following function retrieves the data from the analysis file and predicts the budget based on it for each customer group.
 (defn get-stats-return-budget [historical-file p-type dep dest]
-  (let [historical-data (clojure_airlines.analysis/process-csv historical-file)
-        statistics (clojure_airlines.analysis/calculate-statistics (clojure_airlines.analysis/transform-data historical-data 2024))
+  (let [historical-data (clojure_airlines.analysis.analysis/process-csv historical-file)
+        statistics (clojure_airlines.analysis.analysis/calculate-statistics (clojure_airlines.analysis.analysis/transform-data historical-data 2024))
         direct-route (filter #(and (= (:departure %) dep)
                                    (= (:destination %) dest))
                              statistics)
@@ -231,7 +231,7 @@
                              "group")
         ;; Mean of all the historically bought tickets for the specific group type and all the routes.
         stats-for-type-general (try
-                                 (clojure_airlines.analysis/mean
+                                 (clojure_airlines.analysis.analysis/mean
                                    (map :mean
                                         (filter #(= (:group-type %) p-type-transformed) statistics)))
                                  ;; Set to 0 if the error occurs (no statistics found).
@@ -245,20 +245,20 @@
         ;; We proceed to check whether there is a data for all the routes for this specific group type.
         (if (= 0 stats-for-type-general)
           ;; If there is no, the budget is set to the mean of all the historical prices, for all destinations and group types.
-          (reset! budget-output (clojure_airlines.analysis/mean (map :mean statistics)))
+          (reset! budget-output (clojure_airlines.analysis.analysis/mean (map :mean statistics)))
           ;; If there is, we set the budget to the mean of the historical prices for this specific group type, for all the routes.
           (reset! budget-output stats-for-type-general)))
 
       ;; If the historical data for this route and group type exists, we set the budget to
       ;; the maximum amount of money that was spent historically for this route and group type.
-      (reset! budget-output (:median (first (filter #(= (:group-type %) p-type-transformed) filtered-stats)))))
+      (reset! budget-output (:max (first (filter #(= (:group-type %) p-type-transformed) filtered-stats)))))
     ;;(println "PREDICTED BUDGET IS: " @budget-output)
     @budget-output
     ))
 
 ;; This function retrieves the cheapest ticket price from the plans that were found.
 (defn check-broker [plans]
-  (let [plan (first plans)]
+  (let [plan (last plans)]
     (let [{:keys [path total-cost]} plan]
       ;;(println "TOTAL COST: " total-cost)
       ;;(println "FOR PATH: " formatted-path)

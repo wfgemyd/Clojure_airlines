@@ -1,9 +1,9 @@
-(ns clojure-airlines.graphs
+(ns clojure-airlines.analysis.graphs
   (:use [incanter core charts io]))
 
 ;; Extract the analysis data
-(def data (clojure_airlines.analysis/calculate-statistics
-            (clojure_airlines.analysis/transform-data (clojure_airlines.analysis/process-csv "src/clojure_airlines/data/sales_team_2.csv") 2024)))
+(def data (clojure_airlines.analysis.analysis/calculate-statistics
+            (clojure_airlines.analysis.analysis/transform-data (clojure_airlines.analysis.analysis/process-csv "src/clojure_airlines/data/sales_team_2.csv") 2024)))
 
 ;; Extracting the data we need for our plot, specifically mean price for each route and group type
 (defn extract-plot-data [data]

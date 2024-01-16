@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: postgresql:8.4-702.jdbc4">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/postgresql/postgresql/8.4-702.jdbc4/postgresql-8.4-702.jdbc4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

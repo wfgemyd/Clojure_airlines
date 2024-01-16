@@ -1,4 +1,4 @@
-(ns clojure_airlines.analysis
+(ns clojure_airlines.analysis.analysis
   (:gen-class)
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
