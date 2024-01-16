@@ -38,34 +38,36 @@ lein deps
 lein deps :tree
 ```
 
-4. Ensure that the dataset "Flights_ICA1.csv" file is in the "src/airlines" directory. Alternatively, you can use your own dataset. Ensure it's in CSV format and contains necessary flight data fields.
+4. Make sure that you have Java Installed for Incanter graphs to open. 
 
-5. Run the program using Clojure REPL. 
+5. Ensure that the dataset "Flights_ICA1.csv" file is in the "src/data/airlines" directory. Alternatively, you can use your own dataset. Ensure it's in CSV format and contains necessary flight data fields.
 
-5. Follow the prompts to provide your current location, destination, budget, and maximum number of flights.
+6. Input the departure city, destination city and vector with information about people in your group into the **main-check-broker** function. The vector should contain the name of the person and year of birth. Alternatively, you can use the broker_team_2.csv file to test the function. 
 
-6. The program will display flight plans that meet your criteria, showing the most expensive and cheapest options.
+7. Run the program using Clojure REPL. 
+
+8. If you want the program to give an output, uncomment the print lines of the **main-check-broker** and **get-stats-return-budget**  functions. 
 
 ## Example
 
 ### Scenario
-Finding flights from New York to Los Angeles with a budget of $500 and a maximum of 2 flights.
+Finding flights from Rijeka to Brno for the following group of people:
+
+  ```
+Harry Adams, 1982
+Elsie Adams, 1992
+Alfie Adams, 2017
+Elsie Adams, 2014 
+  ```
 
 ### Results
-- **Plan 1 (Most Expensive)**:
+```
+PREDICTED BUDGET IS:  728.0
+TICKET PRICE IS:  700
+WILL BE SOLD TO CUSTOMER:  700.0
+PROFIT IS:  0.0
+```
 
-  ```
-  Path: New York --> Chicago (200) --> Los Angeles (300)
-  Total Cost: 500
-  Amount of flights: 2
-  ```
-- **Plan 2 (Cheapest)**:
-
-  ```
-  Path: New York --> Los Angeles (500)
-  Total Cost: 500
-  Amount of flights: 1
-  ```
 ## Features 
 
 - **Custom Flight Search**: Input your travel details and let our algorithm present you with the best flight options.
