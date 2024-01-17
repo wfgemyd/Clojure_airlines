@@ -211,8 +211,12 @@
       false)))
 
 ;; The following function retrieves the data from the analysis file and predicts the budget based on it for each customer group.
-(defn get-stats-return-budget [historical-file p-type dep dest]
-  (let [historical-data (clojure_airlines.analysis.analysis/process-csv historical-file)
+(defn get-stats-return-budget [historical-file p-type dep dest & more]
+  ;; printlines? is an optional argument. If there is no 4th argument, it is set to false.
+  (let [printlines? (if (empty? more)
+                      false
+                      (first more))
+        historical-data (clojure_airlines.analysis.analysis/process-csv historical-file)
         statistics (clojure_airlines.analysis.analysis/calculate-statistics (clojure_airlines.analysis.analysis/transform-data historical-data 2024))
         direct-route (filter #(and (= (:departure %) dep)
                                    (= (:destination %) dest))
@@ -252,7 +256,8 @@
       ;; If the historical data for this route and group type exists, we set the budget to
       ;; the maximum amount of money that was spent historically for this route and group type.
       (reset! budget-output (:max (first (filter #(= (:group-type %) p-type-transformed) filtered-stats)))))
-    ;;(println "PREDICTED BUDGET IS: " @budget-output)
+    (if printlines?
+      (println "PREDICTED BUDGET IS: " @budget-output))
     @budget-output
     ))
 
@@ -286,7 +291,8 @@
                                             ;; Classify whether the customers belong to a family or a group
                                             (people-classification people)
                                             departure-city
-                                            destination-city)
+                                            destination-city
+                                            printlines?)
             ;; Rounding up the budget to the nearest lowest 100 to ensure that the ticket will be sold.
             rounded-budget (* 100 (Math/floor (/ budget 100)))
             ;; If the group is a family, the maximum number of flights is 3, otherwise it is 4.
@@ -320,10 +326,11 @@
               (do
                 (println "TICKET PRICE IS: " ticket-price)
                 (println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
-                (println "PROFIT IS: " (* (- rounded-budget ticket-price) (count people)))
+                (println "PROFIT FOR ONE TICKET: " (- rounded-budget ticket-price))
                 (println "TOTAL PROFIT IF BOUGHT" @total-profit)))
             rounded-budget))))))
 
+;; Evaluate the function from Prague to Brno with family of 4 people:
 (main-check-broker "Prague"
                    "Brno"
                    [["Harry Adams", 1982]
