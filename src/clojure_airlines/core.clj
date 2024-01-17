@@ -269,8 +269,12 @@
 
 ;; Main-check-broker is the search function that is called by the broker program.
 ;; It returns the price of the ticket that will be sold to the customer.
-(defn main-check-broker [departure-city destination-city people]
-  (let [g g]
+(defn main-check-broker [departure-city destination-city people & more]
+  ;; The printlines? is an optional argument. If there is no 4th argument, it is set to false.
+  (let [printlines? (if (empty? more)
+                      false
+                      (first more))
+        g g]
     (when (not (empty? @(:vertices g)))
       ;; Get statistics from the historical data and return the predicted budget for the customer.
       (let [budget (get-stats-return-budget "src/clojure_airlines/data/sales_team_2.csv"
@@ -292,30 +296,39 @@
         (cond
           ;; If there is no plans found, it returns ##Inf, to ensure that the broker will not sell non-existing ticket.
           (nil? (first plans)) (do
-                                 ;;(println "NO PLANS FOUND" departure-city "to" destination-city)
+                                 (if printlines?
+                                   (println "NO PLANS FOUND" departure-city "to" destination-city))
                                  ##Inf)
 
           ;; If the customer budget is too low, the function returns ##Inf
           ;; in order to ensure that there won't be negative profit (the broker won't sell ticket for infinite money).
           (< rounded-budget ticket-price) (do
-                                            ;;(println "BUDGET IS TOO LOW, CAN'T SELL TICKET")
+                                            (if printlines?
+                                              (println "BUDGET IS TOO LOW, CAN'T SELL TICKET"))
                                             ##Inf)
-
           :else
           (do
-            ;;(println "TICKET PRICE IS: " ticket-price)
-            ;;(println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
-            ;;(println "PROFIT IS: " (* (- rounded-budget ticket-price) (count people)))
-
             ;; Here, we calculate the maximum clean profit we can acquire if all the tickets will be sold.
             ;; We can not calculate the real profit, as we don't know which tickets will be sold, the broker function does not return that.
             (reset! total-profit (+ @total-profit (* (- rounded-budget ticket-price) (count people))))
-            ;;(println "TOTAL PROFIT" @total-profit)
+            (if printlines?
+              (do
+                (println "TICKET PRICE IS: " ticket-price)
+                (println "WILL BE SOLD TO CUSTOMER: " rounded-budget)
+                (println "PROFIT IS: " (* (- rounded-budget ticket-price) (count people)))
+                (println "TOTAL PROFIT IF BOUGHT" @total-profit)))
             rounded-budget))))))
 
+(main-check-broker "Prague"
+                   "Brno"
+                   [["Harry Adams", 1982]
+                    ["Elsie Adams", 1992]
+                    ["Alfie Adams", 2017]
+                    ["Elsie Adams", 2014]]
+                   true)
 
 ;; If you want to output the total clean profit for the company in the case if all the tickets will are sold, uncomment the following line.
-(println @total-profit)
+(println "Total Maximum Profit is: " @total-profit)
 (reset! total-profit 0)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
