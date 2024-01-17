@@ -18,7 +18,9 @@ The program is structured as follows:
 
 - **User Analysis**: Categorizes the user into one of the groups, either _"family"_ or _"group"_.
 
-- **Historical Flights Sales Analysis**: Conducts a basic analysis of the historical sales and returns predicted budget of the user based on the route they chose and the group type they belong to. 
+- **Historical Flights Sales Analysis**: Analyzes historical sales data to predict user budget based on chosen route and group type.
+
+- **Profit Maximization**: Maximizes the profit of the company by offering the cheapest ticket by the most expensive price the user will agree to by it for.
 
 
 ## Usage 
@@ -42,16 +44,16 @@ lein deps :tree
 
 5. Ensure that the dataset "Flights_ICA1.csv" file is in the "src/data/airlines" directory. Alternatively, you can use your own dataset. Ensure it's in CSV format and contains necessary flight data fields.
 
-6. Input the departure city, destination city and vector with information about people in your group into the **main-check-broker** function. Each person's information should be inside of a separate vector, which should contain the name of the person and year of birth. Alternatively, you can use the broker_team_2.csv file to test the function. 
+6. Input the departure city, destination city and vector with information about people in your group into the **main-check-broker** function. Each person's information should be inside of a separate vector, which should contain the name of the person and year of birth. Alternatively, you can use the broker_team_2.csv file to test the function.
+
+7. Set the fourth argument of **main-check-broker** function to "true" for program output. If no 4th argument is provided, the program will not provide an output.
 
 7. Run the program using Clojure REPL. 
-
-8. If you want the program to give an output, uncomment the print lines of the **main-check-broker** and **get-stats-return-budget** functions. 
 
 ## Example
 
 ### Scenario
-Finding flights from Rijeka to Brno for the following group of people:
+Finding flights from Prague to Brno for the following group of people:
 
   ```
 Harry Adams, 1982
@@ -62,10 +64,11 @@ Elsie Adams, 2014
 
 ### Results
 ```
-PREDICTED BUDGET IS:  728.0
-TICKET PRICE IS:  700
+FOR PATH:  Prague (0) -> Brno (100)
+TICKET PRICE IS:  100
 WILL BE SOLD TO CUSTOMER:  700.0
-PROFIT IS:  0.0
+PROFIT IS:  2400.0
+TOTAL PROFIT IF BOUGHT 2400.0
 ```
 
 ## Features 
@@ -77,7 +80,7 @@ PROFIT IS:  0.0
 - **Graph representation of flight networks**: The flight connections and cities are presented in a graph data structure for a clear representation of the flight network.
 
 - **Historical Data Analysis Visualization**: The data visualizations are presented in the code using the **Incanter** library and in the **assets** folder.
-  
+ 
 - **Customizable and Extensible Code Structure**: Tailor the application to your needs or contribute to its growth!
 
 ## Limitations and Future Improvements 
@@ -87,6 +90,8 @@ PROFIT IS:  0.0
 - **Error Handling**: The program currently does not handle missing fields or invalid inputs (e.g., non-existent cities, negative budget values) in the dataset gracefully. Ensure that the CSV file has no missing or invalid values.
   
 - **Limited Filtering Options**: Currently, our program is designed to output the most and least expensive flight connections.
+
+- **Limiter Budget Prediction Model**: The program currently uses a simple hypothesis to predict the user's budget based on the historical data. The groups of people are distinguished only by two types now. The model does not support the budget evaluation for an individual. The model can be improved by using more advanced machine learning techniques. 
 
 - **Localization**: Currently, the program only supports datasets and inputs in English. Internationalization features, such as multi-language support, are not yet implemented.
 

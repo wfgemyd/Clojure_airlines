@@ -203,7 +203,7 @@
         (swap! ysob conj yob)))
     ;; The 2006 is hardcoded, as there is no specific function in clojure to retrieve the current year.
     ;; If the group consists of at least one child and one adult, and all the people have the same surname, the group is a family.
-    ;; The departure and destination of the people in the group is always the same, as it is defined in the broker program.
+    ;; We suppose that the departure and destination of the people in the group is always the same, as it is defined in the broker program.
     (if (and (= (count (distinct @surnames)) 1)
              (some #(> % 2006) @ysob)
              (some #(< % 2006) @ysob))
@@ -256,12 +256,17 @@
     @budget-output
     ))
 
+(defn format-route [data]
+  (->> data
+       (map #(str (:city %) " (" (:cost %) ")"))
+       (clojure.string/join " -> ")))
+
 ;; This function retrieves the cheapest ticket price from the plans that were found.
 (defn check-broker [plans]
   (let [plan (last plans)]
     (let [{:keys [path total-cost]} plan]
       ;;(println "TOTAL COST: " total-cost)
-      ;;(println "FOR PATH: " formatted-path)
+      (println "FOR PATH: " (format-route path))
 
       total-cost)))
 
@@ -328,7 +333,7 @@
                    true)
 
 ;; If you want to output the total clean profit for the company in the case if all the tickets will are sold, uncomment the following line.
-(println "Total Maximum Profit is: " @total-profit)
+;;(println "Total Maximum Profit is: " @total-profit)
 (reset! total-profit 0)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
