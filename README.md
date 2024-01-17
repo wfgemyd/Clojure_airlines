@@ -1,6 +1,6 @@
 # Clojure Airlines 🛫
 
-This project forms a part of the Symbolic Computation course in the BSc (Hons) Computing program. Presented Clojure program efficiently reads and processes flight data, offering personalized flight plans tailored to your preferences.
+This project forms a part of the Symbolic Computation course in the BSc (Hons) Computing program. Presented Clojure program efficiently reads and processes flight data, offering personalized flight tickets, which are tailored to increase the company's profit. 
 
 ## Overview
 
@@ -10,7 +10,7 @@ The program is structured as follows:
 
 - **Graph Representation**: Constructs a graph where cities are vertices and flights are edges, representing the entire flight network.
 
-- **User Input**: Accepts user preferences including current location, destination, budget, and maximum flight count.
+- **User Input**: Accepts user's input including current location, destination, name and date of birth. The user's input may be a group of people. 
 
 - **Flight Plan Generation**: Employs a breadth-first search (BFS) algorithm to curate flight plans meeting user's criteria.
 
@@ -18,7 +18,7 @@ The program is structured as follows:
 
 - **User Analysis**: Categorizes the user into one of the groups, either _"family"_ or _"group"_.
 
-- **Historical Flights Sales Analysis**: Accepts the user characteristics, conducts a basic analysis of the historical sales and returns predicted budget of the user based on the route they chose and the group type they belong to. 
+- **Historical Flights Sales Analysis**: Conducts a basic analysis of the historical sales and returns predicted budget of the user based on the route they chose and the group type they belong to. 
 
 
 ## Usage 
@@ -38,15 +38,15 @@ lein deps
 lein deps :tree
 ```
 
-4. Make sure that you have Java Installed for Incanter graphs to open. 
+4. Make sure that you have Java Installed for Incanter graphs to display correctly. 
 
 5. Ensure that the dataset "Flights_ICA1.csv" file is in the "src/data/airlines" directory. Alternatively, you can use your own dataset. Ensure it's in CSV format and contains necessary flight data fields.
 
-6. Input the departure city, destination city and vector with information about people in your group into the **main-check-broker** function. The vector should contain the name of the person and year of birth. Alternatively, you can use the broker_team_2.csv file to test the function. 
+6. Input the departure city, destination city and vector with information about people in your group into the **main-check-broker** function. Each person's information should be inside of a separate vector, which should contain the name of the person and year of birth. Alternatively, you can use the broker_team_2.csv file to test the function. 
 
 7. Run the program using Clojure REPL. 
 
-8. If you want the program to give an output, uncomment the print lines of the **main-check-broker** and **get-stats-return-budget**  functions. 
+8. If you want the program to give an output, uncomment the print lines of the **main-check-broker** and **get-stats-return-budget** functions. 
 
 ## Example
 
@@ -70,13 +70,13 @@ PROFIT IS:  0.0
 
 ## Features 
 
-- **Custom Flight Search**: Input your travel details and let our algorithm present you with the best flight options.
-  
-- **Interactive CLI**: The interactive command-line prompts offer a user-friendly experience for easy navigation.
-  
+- **Custom Flight Search**: Input your travel details and let our algorithm present you with the best ticket price options. 
+    
 - **Multiple Destinations**: Multiple route options can be explored to reach your desired location.
   
 - **Graph representation of flight networks**: The flight connections and cities are presented in a graph data structure for a clear representation of the flight network.
+
+- **Historical Data Analysis Visualization**: The data visualizations are presented in the code using the **Incanter** library and in the **assets** folder.
   
 - **Customizable and Extensible Code Structure**: Tailor the application to your needs or contribute to its growth!
 
