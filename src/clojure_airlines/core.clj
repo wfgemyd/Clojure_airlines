@@ -277,9 +277,9 @@
 
 (def total-profit (atom 0))
 
-;; Main-check-broker is the search function that is called by the broker program.
+;; prepare_travel_plan is the search function that is called by the broker program.
 ;; It returns the price of the ticket that will be sold to the customer.
-(defn main-check-broker [departure-city destination-city people & more]
+(defn prepare_travel_plan [departure-city destination-city people & more]
   ;; The printlines? is an optional argument. If there is no 4th argument, it is set to false.
   (let [printlines? (if (empty? more)
                       false
@@ -331,7 +331,7 @@
             rounded-budget))))))
 
 ;; Evaluate the function from Prague to Brno with family of 4 people:
-(main-check-broker "Prague"
+(prepare_travel_plan "Prague"
                    "Brno"
                    [["Harry Adams", 1982]
                     ["Elsie Adams", 1992]
